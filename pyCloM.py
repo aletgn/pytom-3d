@@ -24,6 +24,7 @@ from numpy import cos, sin
 from fancy_log import milestone as ml
 from fancy_log import single_operation as so
 import matplotlib.pyplot as plt
+from matplotlib import ticker
 # global log_level
 # log_level = 1
 
@@ -294,7 +295,7 @@ class point_cloud:
         self.compute_centroid()
         pass
 
-def cloud_views_2d(cloud_list):
+def cloud_views_2d(*cloud_list):
     msize = 0.4
     fig, ax = plt.subplots(nrows=2, ncols=2, dpi=300)
     for c in cloud_list:
@@ -327,15 +328,12 @@ def cloud_views_2d(cloud_list):
     fig.tight_layout(pad=1)
     plt.show()
     
-def cloud_view_3d(cloud_list):
-    plt.rcParams["font.size"] = 12
-    from matplotlib import ticker
+def cloud_view_3d(*cloud_list):
     fig = plt.figure(figsize=plt.figaspect(1.2),dpi=300)#figsize=plt.figaspect(1))
     ax = fig.add_subplot(1, 1, 1, projection='3d')
     ax.set_xlabel('$x_i$ [mm]')
     ax.set_ylabel('$y_i$ [mm]')
-    # ax.set_xlabel('$x$ [mm]')
-    # ax.set_ylabel('$y$ [mm]')
+    ax.set_zlabel('$z_i$ [mm]')
     ax.xaxis.pane.fill = False
     ax.yaxis.pane.fill = False
     ax.zaxis.pane.fill = False
@@ -343,25 +341,27 @@ def cloud_view_3d(cloud_list):
     ax.yaxis.pane.set_edgecolor('w')
     ax.zaxis.pane.set_edgecolor('w')
     ax.grid(True)
-    plt.gca().xaxis.set_major_formatter(ticker.StrMethodFormatter("{x:.0f}"))
-    plt.gca().yaxis.set_major_formatter(ticker.StrMethodFormatter("{x:.0f}"))
-    plt.gca().zaxis.set_major_formatter(ticker.StrMethodFormatter("{x:.2f}"))
+    plt.gca().xaxis.set_major_formatter(ticker.StrMethodFormatter("{x:.1f}"))
+    plt.gca().yaxis.set_major_formatter(ticker.StrMethodFormatter("{x:.1f}"))
+    plt.gca().zaxis.set_major_formatter(ticker.StrMethodFormatter("{x:.1f}"))
     for c in cloud_list:
         coord = c.data
         ax.scatter(coord[:,0], coord[:,1],coord[:,2],
                         s=0.1, #c=coord[:,2], cmap='jet',
                         marker="o",label=c.data_file)
-        ax.legend()
+    ax.legend(loc='upper center',ncol=len(cloud_list)+1)#, bbox_to_anchor=(0.5,1.5))
     plt.show()
 
 if __name__ == '__main__':
     cloud = point_cloud('data_set.txt', 1, 2, 0, ',')
     cloud.compute_extrema()
     cloud.compute_centroid()
+    cloud1 = point_cloud('data_set.txt', 1, 2, 0, ',')
+    cloud1.flip_cloud(1)
     # cloud.flip_cloud(2)
     # cloud.translate_cloud(np.array([50,100,-100]))
     # cloud.rotate_cloud([0, 0, 0], 1, 0)
     
-    # cloud_view_3d([cloud])
-    cloud.cutoff_cloud(1, [0, 25])
-    cloud_views_2d([cloud])
+    cloud_view_3d(cloud,cloud1)
+    # cloud.cutoff_cloud(1, [0, 25])
+    cloud_views_2d(cloud,cloud1)
