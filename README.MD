@@ -98,13 +98,13 @@ and this attribute is consistently updated throughout the manipulations/transfor
 Once the data has been acquired, one can quickly display the result through:
 
 ```python
-cl.cloud_view_3d()
+cloud_view_3d(cl)
 ```
 
 or display different views of the point cloud by using
 
 ```python
-cl.cloud_views_2d()
+cloud_views_2d(cl)
 ```
 
 Additionally, it is possible to compute both the extrema (min/max of x,y, and z) and the centroid of the point cloud; just use:
