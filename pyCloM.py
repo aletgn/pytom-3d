@@ -64,17 +64,16 @@ class point_cloud:
             - x -> 0;
             - y -> 1;
             - z -> 2.
-        Raw data is stored in the attribute original_data, which is a Nx3 numpy
+        Raw data is stored in the attribute raw_data, which is a Nx3 numpy
         array (N is the total number of rows in data_file).
         The attribute data contains the manipulated data, which is consistently
         updated throughout the manipulation process. 
         """
         self.file_name = file_name
         self.raw_data  = np.loadtxt(self.file_name, delimiter=col_sep)
-        self.original_data = np.array([self.raw_data[:,col_x],
-                                       self.raw_data[:,col_y],
-                                       self.raw_data[:,col_z]]).T
-        self.data = self.original_data
+        self.data = np.array([self.raw_data[:,col_x],
+                              self.raw_data[:,col_y],
+                              self.raw_data[:,col_z]]).T
         if add_params.get('cloud_label'):
             self.cloud_label = add_params['cloud_label']
         else:
@@ -94,6 +93,16 @@ class point_cloud:
         self.x_g = None
         self.y_g = None
         self.z_g = None
+        
+    def __len__(self):
+        """
+        Returns
+        -------
+        int
+            number of rows of the attibute data, that is the number of acquire 
+            points of the cloud
+        """
+        return len(self.data)
 
     def compute_extrema(self):
         """
@@ -372,3 +381,5 @@ if __name__ == '__main__':
     cloud_view_3d(cloud,cloud1)
     # cloud.cutoff_cloud(1, [0, 25])
     cloud_views_2d(cloud,cloud1)
+    
+    print(len(cloud))
