@@ -76,10 +76,10 @@ In this instance it is worth observing that the column:
 
 Therefore, it does not matter how the columns are sorted in ```data_set.txt```, since the user can select them appropriately.
 
-The coordinates has been acquired, and they are now stored in the attribute:
+The raw coordinates of the point cloud have been acquired, and they are now stored in the attribute:
 
 ```python
-cl.original_data
+cl.raw_data
 ```
 
 Furthermore, a copy of ```original_data``` is also stored in:
@@ -88,20 +88,26 @@ Furthermore, a copy of ```original_data``` is also stored in:
 cl.data
 ```
 
-and this attribute is consistently updated throughout the manipulations/transformation of the point cloud. Both ```original_data``` and ```data``` are treated as a ```numpy array``` of dimension ```N x 3``` where ```N``` is the number of acquired points.
+and this attribute is consistently updated throughout the manipulations/transformation of the point cloud. Both ```raw_data``` and ```data``` are treated as a ```numpy array``` of dimension ```N x 3``` where ```N``` is the number of acquired points.
 
 
 # Point Cloud Manipulation <a name="point-cloud-manipulation"></a>
 
 ## Preliminary Inspection <a name="preliminary-inspection"></a>
 
-Once the data has been acquired, one can quickly display the result through:
+Once the data has been acquired, it is possible to check how many points are there. This is accomplished by the (overloaded) function ```__len__```:
+
+```python
+len(cloud)
+```
+
+Also, one can quickly display the result through:
 
 ```python
 cloud_view_3d(cl)
 ```
 
-or display different views of the point cloud by using
+and display different views of the point cloud by using:
 
 ```python
 cloud_views_2d(cl)
