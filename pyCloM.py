@@ -25,12 +25,9 @@ from fancy_log import milestone as ml
 from fancy_log import single_operation as so
 import matplotlib.pyplot as plt
 from matplotlib import ticker
-# global log_level
-# log_level = 1
-
 
 class point_cloud:
-    def __init__(self, data_file, col_x, col_y, col_z, col_sep):
+    def __init__(self, file_name, col_x, col_y, col_z, col_sep, **add_params):
         """
         Parameters
         ----------
@@ -52,6 +49,10 @@ class point_cloud:
             index of the column containing the z-coordinates of the point cloud.
         col_sep : str
             column separator
+        add_params: dictionary
+            this argument represents additional parameters. The following can 
+            be specified:
+                - cloud_label, in order to name the acquired point cloud
 
         Returns
         -------
@@ -68,9 +69,16 @@ class point_cloud:
         The attribute data contains the manipulated data, which is consistently
         updated throughout the manipulation process. 
         """
-        self.data_file = data_file
-        self.original_data = np.loadtxt(self.data_file, delimiter=col_sep)
+        self.file_name = file_name
+        self.raw_data  = np.loadtxt(self.file_name, delimiter=col_sep)
+        self.original_data = np.array([self.raw_data[:,col_x],
+                                       self.raw_data[:,col_y],
+                                       self.raw_data[:,col_z]]).T
         self.data = self.original_data
+        if add_params.get('cloud_label'):
+            self.cloud_label = add_params['cloud_label']
+        else:
+            self.cloud_label = file_name
         #
         # cloud extrema
         #
@@ -303,7 +311,7 @@ def cloud_views_2d(*cloud_list):
         ax[0,0].plot(coord[:,0],coord[:,1],'o',
                       markersize=msize,
                       picker=True,
-                      pickradius=5,label = c.data_file)
+                      pickradius=5,label = c.cloud_label)
         ax[0,0].set_xlabel('x [mm]')
         ax[0,0].set_ylabel('y [mm]')
         ax[0,0].grid('True')
@@ -348,12 +356,12 @@ def cloud_view_3d(*cloud_list):
         coord = c.data
         ax.scatter(coord[:,0], coord[:,1],coord[:,2],
                         s=0.1, #c=coord[:,2], cmap='jet',
-                        marker="o",label=c.data_file)
+                        marker="o",label=c.cloud_label)
     ax.legend(loc='upper center',ncol=len(cloud_list)+1)#, bbox_to_anchor=(0.5,1.5))
     plt.show()
 
 if __name__ == '__main__':
-    cloud = point_cloud('data_set.txt', 1, 2, 0, ',')
+    cloud = point_cloud('data_set.txt', 2, 1, 0, ',', cloud_label = 'cloud_1')
     cloud.compute_extrema()
     cloud.compute_centroid()
     cloud1 = point_cloud('data_set.txt', 1, 2, 0, ',')
@@ -361,7 +369,6 @@ if __name__ == '__main__':
     # cloud.flip_cloud(2)
     # cloud.translate_cloud(np.array([50,100,-100]))
     # cloud.rotate_cloud([0, 0, 0], 1, 0)
-    
     cloud_view_3d(cloud,cloud1)
     # cloud.cutoff_cloud(1, [0, 25])
     cloud_views_2d(cloud,cloud1)
