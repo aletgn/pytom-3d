@@ -11,6 +11,9 @@ pyCloM is simple Python module to ease the manipulation of 3-dimensional point c
     - [Rigid Rotation](#rigid-rotation)
     - [Flip](#flip)
     - [Cut-off](#flip)
+  * [Algebraic Transformation](#algebraic-transformations)
+    - [Singular Value Decomposition (SVD)](#svd)
+
 - [TO-DO List](#todo-list)
 
 # Requirements and Installation <a name="requirements-and-installation"></a>
@@ -206,7 +209,24 @@ cl.cutoff_cloud(ax, [ax_min,ax_max])
 
 where ```ax``` is the reference axis for the cut-off and ```[ax_min,ax_max]``` is the vector of the threshold values.
 
+## [Algebraic Transformation]<a name="algebraic-transformations")
+### [Singular Value Decomposition (SVD)]<a name="svd")
+Let **M** be a generic matrix belonging to *R*<sup>m x n</sup>. SVD allows **M** to be decomposed into the product of three matrices:
+
+**M** = **U** **S** **V**
+
+where **U** (in *R*<sup>m x m</sup>), and **V** (in *R*<sup>n x n</sup>) are called respectively *left-* and *right-principal* matrix (both orthonormal), whereas **S** (in *R*<sup>m x n</sup) is the so-called matrix of the Singular Values.
+
+In this instance, SVD reaches its full potential when combined with some geometric transformations. In particular:
+
+- translation to the centroid
+- SVD applied to the point cloud in this new reference frame
+- rotation using the right-principal matrix
+- restore the original position of the point cloud (translation to -centroid)
+
+Why is SVD so important? SVD may help find the preferred direction along which the point are distributed.
 
 ## TO-DO List <a name="todo-list"></a>
 - [ ] Enhance data visualisation
 - [ ] Add methods to export data
+- [ ] Clarify explanation of SVD
