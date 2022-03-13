@@ -207,6 +207,6 @@ cl.cutoff_cloud(ax, [ax_min,ax_max])
 where ```ax``` is the reference axis for the cut-off and ```[ax_min,ax_max]``` is the vector of the threshold values.
 
 
-## TO-DO List <a name="todo-list"></a>
+# TO-DO List <a name="todo-list"></a>
 - [ ] Enhance data visualisation
 - [ ] Add methods to export data
