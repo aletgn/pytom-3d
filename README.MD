@@ -215,7 +215,7 @@ Let **M** be a generic matrix belonging to *R*<sup>m x n</sup>. SVD allows **M**
 
 **M** = **U** **S** **V**
 
-where **U** (in *R*<sup>m x m</sup>), and **V** (in *R*<sup>n x n</sup>) are called respectively *left-* and *right-principal* matrix (both orthonormal), whereas **S** (in *R*<sup>m x n</sup) is the so-called matrix of the Singular Values.
+where **U** (in *R*<sup>m x m</sup>), and **V** (in *R*<sup>n x n</sup>) are called respectively *left-* and *right-principal* matrix (both orthonormal), whereas **S** (in *R*<sup>m x n</sup>) is the so-called matrix of the Singular Values.
 
 In this instance, SVD reaches its full potential when combined with some geometric transformations. In particular:
 
@@ -224,7 +224,13 @@ In this instance, SVD reaches its full potential when combined with some geometr
 - rotation using the right-principal matrix
 - restore the original position of the point cloud (translation to -centroid)
 
-Why is SVD so important? SVD may help find the preferred direction along which the point are distributed.
+All these operation are condensed and performed automatically by the method:
+
+```python
+cl.cloud_svd()
+```
+
+Why is SVD so important? SVD may help find the preferred direction along which the point are distributed, and align the reference frame according to these preferred direction.
 
 ## TO-DO List <a name="todo-list"></a>
 - [ ] Enhance data visualisation
