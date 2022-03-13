@@ -11,7 +11,7 @@ pyCloM is simple Python module to ease the manipulation of 3-dimensional point c
     - [Rigid Rotation](#rigid-rotation)
     - [Flip](#flip)
     - [Cut-off](#flip)
-  * [Algebraic Transformation](#algebraic-transformations)
+  * [Algebraic Transformation](#algebraic-transformation)
     - [Singular Value Decomposition (SVD)](#svd)
 
 - [TO-DO List](#todo-list)
@@ -209,13 +209,13 @@ cl.cutoff_cloud(ax, [ax_min,ax_max])
 
 where ```ax``` is the reference axis for the cut-off and ```[ax_min,ax_max]``` is the vector of the threshold values.
 
-## [Algebraic Transformation]<a name="algebraic-transformations")
-### [Singular Value Decomposition (SVD)]<a name="svd")
-Let **M** be a generic matrix belonging to *R*<sup>m x n</sup>. SVD allows **M** to be decomposed into the product of three matrices:
+## Algebraic Transformation <a name="algebraic-transformation"></a>
+### Singular Value Decomposition (SVD) <a name="svd"></a>
+Let **M** be a generic matrix belonging to *R*<sup> m x n</sup>. SVD allows **M** to be decomposed into the product of three matrices:
 
 **M** = **U** **S** **V**
 
-where **U** (in *R*<sup>m x m</sup>), and **V** (in *R*<sup>n x n</sup>) are called respectively *left-* and *right-principal* matrix (both orthonormal), whereas **S** (in *R*<sup>m x n</sup>) is the so-called matrix of the Singular Values.
+where **U** (in *R*<sup> m x m</sup>), and **V** (in *R*<sup> n x n</sup>) are called respectively *left-* and *right-principal* matrix (both orthonormal), whereas **S** (in *R*<sup> m x n</sup>) is the so-called matrix of the Singular Values.
 
 In this instance, SVD reaches its full potential when combined with some geometric transformations. In particular:
 
