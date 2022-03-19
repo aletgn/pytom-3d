@@ -13,6 +13,8 @@ pyCloM is simple Python module to ease the manipulation of 3-dimensional point c
     - [Cut-off](#flip)
   * [Algebraic Transformation](#algebraic-transformation)
     - [Singular Value Decomposition (SVD)](#svd)
+       - [Brief Definition](#svd-def)
+       - [Using SVD](#using-svd) 
 
 - [TO-DO List](#todo-list)
 
@@ -211,28 +213,35 @@ where ```ax``` is the reference axis for the cut-off and ```[ax_min,ax_max]``` i
 
 ## Algebraic Transformation <a name="algebraic-transformation"></a>
 ### Singular Value Decomposition (SVD) <a name="svd"></a>
+#### Brief Definition <a name="svd-def"></a>
 Let **M** be a generic matrix belonging to *R*<sup> m x n</sup>. SVD allows **M** to be decomposed into the product of three matrices:
 
 **M** = **U** **S** **V**
 
 where **U** (in *R*<sup> m x m</sup>), and **V** (in *R*<sup> n x n</sup>) are called respectively *left-* and *right-principal* matrix (both orthonormal), whereas **S** (in *R*<sup> m x n</sup>) is the so-called matrix of the Singular Values.
 
-In this instance, SVD reaches its full potential when combined with some geometric transformations. In particular:
+#### Using SVD <a name="using-svd"></a>
 
-- translation to the centroid
-- SVD applied to the point cloud in this new reference frame
-- rotation using the right-principal matrix
-- restore the original position of the point cloud (translation to -centroid)
+Suppose that the points of the cloud are distributed according to three preferred directions, which are identifiable by visual inspection. Assume that these directions define a reference frame *{x<sub> S</sub>,y<sub> S</sub>,z<sub> S</sub>}*. Conversely, assume that the points forming the point cloud have been acquired with respect to another (arbitrary) reference frame *{x,y,z}*, which (unfortunately) is not aligned with *{x<sub> S</sub>,y<sub> S</sub>,z<sub> S</sub>}*. However, expressing the acquired points with respect to *{x<sub> S</sub>,y<sub> S</sub>,z<sub> S</sub>}* would be of considerable interest, e.g. for further numerical computations. From a mathematical standpoint, a change of reference frame, i.e. change of basis, from *{x,y,z}* to *{x<sub> S</sub>,y<sub> S</sub>,z<sub> S</sub>}* is sought as well as the associated matrix.
 
-All these operation are condensed and performed automatically by the method:
+In this instance, it is therefore evident that finding this matrix by inspection, intuition or "trial & error" becomes preposterous. SVD holds the potential to compute such a matrix almost automatically. Let **M** (in *R*<sup> N x 3 </sup>) be the matrix representing the point cloud. In order to apply the SVD and obtain satisfactory results, the whole point cloud should be translated to -centroid. Following, the SVD applied to **M** provides **U** (in *R*<sup> N x N </sup>), **S** (in *R*<sup> N x 3 </sup>), and **V** (in *R*<sup> 3 x 3 </sup>). In particular, **V** is the matrix that realises the change of reference frame. Hence, each point of **M**, namely **M**<sub>i</sub>, will be rotated according to **V** as follows:
+
+**M**<sub> i, S </sub> = **V** **M**<sub> i </sub>
+
+where **M**<sub> i, S </sub> is **M**<sub> i </sub> but expressed with respect to *{x<sub> S</sub>,y<sub> S</sub>,z<sub> S</sub>}*. Finally, **M** is restored to its original position by translating it to +centroid.
+
+All these operation are condensed and performed by the method:
 
 ```python
 cl.cloud_svd()
 ```
 
-Why is SVD so important? SVD may help find the preferred direction along which the point are distributed, and align the reference frame according to these preferred direction.
+**Remark**. Given that **V** is orthonormal the point cloud are subjected to a *rigid* rotation: neither stretching nor deformations occur.
+
+**Remark**. If the determinant of **V** is -1, the transformed cloud (through SVD) may need flipping. To overcome this use ```flip_cloud``` ([Flip](#flip)).
+
+
 
 ## TO-DO List <a name="todo-list"></a>
 - [ ] Enhance data visualisation
 - [ ] Add methods to export data
-- [ ] Clarify explanation of SVD
