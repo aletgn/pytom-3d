@@ -21,6 +21,7 @@
 
 import numpy as np
 from numpy import cos, sin
+from numpy.linalg import svd, det
 from fancy_log import milestone as ml
 from fancy_log import single_operation as so
 import matplotlib.pyplot as plt
@@ -311,6 +312,35 @@ class point_cloud:
         self.compute_extrema()
         self.compute_centroid()
         pass
+    
+    def cloud_svd(self):
+        """
+        Let the point cloud data stored in self.data be represented by the 
+        matrix M. This method carries out a sequence of operations:                
+        
+        1) update centroid 
+        2) translation to the -centroid
+        3) Singular Value Decomposition (SVD): M = U*S*V
+        4) Rotation according to the right principal matrix (V)
+        5) translation to centroid to restore the cloud position 
+    
+        Returns
+        -------
+        None.
+
+        """
+        log_level = 1
+        self.translate_cloud(-np.array([self.x_g,self.y_g,self.z_g]))
+        ml('PERFORMING SINGULAR VALUE DECOMPOSITION', log_level)
+        U,S,V = svd(self.data)
+        so('Right principal matrix\n', log_level,V)
+        so('Determinant of right principal matrix', log_level, det(V))
+        so('Singular values', log_level, S)
+        self.data = np.array([np.matmul(V,p) for p in self.data])
+        self.translate_cloud(np.array([self.x_g,self.y_g,self.z_g]))
+        self.compute_extrema()
+        self.compute_centroid()
+        
 
 def cloud_views_2d(*cloud_list):
     msize = 0.4
@@ -373,13 +403,14 @@ if __name__ == '__main__':
     cloud = point_cloud('data_set.txt', 2, 1, 0, ',', cloud_label = 'cloud_1')
     cloud.compute_extrema()
     cloud.compute_centroid()
-    cloud1 = point_cloud('data_set.txt', 1, 2, 0, ',')
+    cloud1 = point_cloud('data_set.txt', 2, 1, 0, ',')
     cloud1.flip_cloud(1)
     # cloud.flip_cloud(2)
     # cloud.translate_cloud(np.array([50,100,-100]))
     # cloud.rotate_cloud([0, 0, 0], 1, 0)
     cloud_view_3d(cloud,cloud1)
+    cloud.cloud_svd()
+    cloud_view_3d(cloud,cloud1)
     # cloud.cutoff_cloud(1, [0, 25])
     cloud_views_2d(cloud,cloud1)
     
-    print(len(cloud))
