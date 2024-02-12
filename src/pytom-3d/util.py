@@ -65,5 +65,5 @@ def update(method: callable):
         for d in data:
             event[d[0]] = d[1]
         
-        self.events.append(event)
+        self.history_.append(event)
     return wrapper

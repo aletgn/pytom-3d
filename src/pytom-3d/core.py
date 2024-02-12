@@ -36,7 +36,7 @@ class Cloud:
         self.m = None
         self.M = None
         self.G = None
-        self.events = []
+        self.history_ = []
     
     def edges(self) -> None:
         """
@@ -78,7 +78,7 @@ class Cloud:
 
         """
         self.P += v
-        return [(len(self.events), self.translate.__name__), ("vector", v)]
+        return [(len(self.history_), self.translate.__name__), ("vector", v)]
     
     @update
     def rotate(self, v: np.ndarray = np.array([0.,0.,0.]),
@@ -120,7 +120,7 @@ class Cloud:
         self.translate(v)
         np.matmul(self.P, R)
         self.translate(np.array([-h for h in v]))
-        return [(len(self.events), self.rotate.__name__),
+        return [(len(self.history_), self.rotate.__name__),
                 ("centre", v), ("angles", t_deg), ("rot_mat", R)]
     
     @update
@@ -140,7 +140,7 @@ class Cloud:
     
         """
         self.P *= v
-        return [(len(self.events), self.flip.__name__), ("flip", v)]
+        return [(len(self.history_), self.flip.__name__), ("flip", v)]
     
     @update
     def cut(self, ax: str = None, lo: float = -np.inf, up: float = np.inf,
@@ -191,9 +191,9 @@ class Cloud:
         if self.P.shape[0] == 0:
             raise ValueError("The cloud has no points.")
         else:        
-            return [(len(self.events), self.cut.__name__), ("axis", ax),
-                    ("lower bnd", lo),
-                    ("upper bnd", up),
+            return [(len(self.history_), self.cut.__name__), ("axis", ax),
+                    ("lo", lo),
+                    ("up", up),
                     ("exterior", out)]
     @update
     def svd(self) -> List[Tuple]:
@@ -214,12 +214,15 @@ class Cloud:
         """
         U,S,V = np.linalg.svd(self.P)
         self.rotate(-self.G, rot_mat=V)
-        return [(len(self.events), self.svd.__name__),
-                ("Left prin. mat.", U),
-                ("Right prin. mat.", V),
-                ("Sing val. mat.", S),
-                ("Det sing val. mat.", np.linalg.det(V)),] 
-            
+        return [(len(self.history_), self.svd.__name__),
+                ("U", U),
+                ("V", V),
+                ("S", S),
+                ("det_S", np.linalg.det(V)),] 
+    
+    def regression(regressor, **args):
+        pass
+    
     
     def history(self):
         """
@@ -235,7 +238,7 @@ class Cloud:
         -----
         Each event is separated by a line of dashes for better readability.
         """
-        for h in self.events:
+        for h in self.history_:
             print("-------------------------------------------------------")
             for k in h.keys():
                 print( k, h[k])
@@ -251,6 +254,10 @@ class Cloud:
         s_max = f"MAX: {self.M}\n"
         s_ = f"{self.P}\n"
         return s_name+s_len+s_min+s_max+s_
+
+
+class Grid():
+    
 
 def main():
     pass
