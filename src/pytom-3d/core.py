@@ -1,34 +1,35 @@
 import numpy as np
 import pandas as pd
 from numpy import cos, sin
-import functools
+from typing import List, Tuple
+from util import update
 # from numpy.linalg import svd, det
 # from fancy_log import milestone as ml
 # from fancy_log import single_operation as so
 # import matplotlib.pyplot as plt
 # from matplotlib import ticker
 
-def update(method: callable):
-    @functools.wraps(method)
-    def wrapper(self, *args, **kwargs) -> None:
-        # retrive values the method returns
-        data = method(self, *args, **kwargs)
-        
-        # update edges and centroid
-        self.edges()
-        self.centroid()
-        
-        # structure data for history
-        event = {}
-        for d in data:
-            event[d[0]] = d[1]
-        
-        self.events.append(event)
-    return wrapper
-
 class Cloud:
     
     def __init__(self, file_path: str, reader: callable, name: str = "unnamed", **reader_args) -> None:
+        """
+        Initialize the Cloud instance.
+
+        Parameters
+        ----------
+        file_path : str
+            The path to the file.
+        reader : callable
+            A callable pandas reader function to read data from the file.
+        name : str, optional
+            The name of the instance, by default "unnamed".
+        **reader_args
+            Additional arguments to pass to the reader.
+
+        Returns
+        -------
+        None
+        """
         self.name = name
         self.file_path = file_path
         self.P = reader(self.file_path, **reader_args).to_numpy(dtype=np.float128)
@@ -39,21 +40,64 @@ class Cloud:
         self.events = []
     
     def edges(self) -> None:
+        """
+        Update the minimum and maximum values along each dimension.
+
+        Returns
+        -------
+        None
+        """
         self.m = self.P.min(axis=0)
         self.M = self.P.max(axis=0)
         
     def centroid(self) -> None:
+        """
+        Update the centroid of the data.
+
+        Returns
+        -------
+        None
+        """
         self.G = self.P.sum(axis=0)/self.N
     
     @update
-    def translate(self, v: np.ndarray = np.array([0,0,0])) -> None:
+    def translate(self, v: np.ndarray = np.array([0,0,0])) -> List[Tuple]:
+        """
+        Translate the data points by the given vector.
+    
+        Parameters
+        ----------
+        v : np.ndarray, optional
+            The translation vector, by default np.array([0, 0, 0]).
+    
+        Returns
+        -------
+        List[Tuple]
+            A list containing information about the translation event.
+        """
         self.P += v
         return [(len(self.events), self.translate.__name__), ("vector", v)]
     
     @update
     def rotate(self, v: np.ndarray = np.array([0.,0.,0.]),
-               t_deg: np.ndarray = np.array([0.,0.,0.])) -> None:
-        # check
+               t_deg: np.ndarray = np.array([0.,0.,0.])) -> List[Tuple]:
+        """
+        Rotate the data points about a specified center.
+    
+        Parameters
+        ----------
+        v : np.ndarray, optional
+            The center of rotation, by default np.array([0., 0., 0.]).
+        t_deg : np.ndarray, optional
+            The rotation angles in degrees around x, y, and z axes,
+            by default np.array([0., 0., 0.]).
+    
+        Returns
+        -------
+        List[Tuple]
+            A list containing information about the rotation event.
+
+        """
         t = np.deg2rad(t_deg)
         
         rx = np.array([[1, 0, 0],
@@ -76,15 +120,57 @@ class Cloud:
                 ("centre", v), ("angles", t_deg)]
     
     @update
-    def flip(self, v: np.ndarray = np.array([1.,1.,1.])) -> None:
+    def flip(self, v: np.ndarray = np.array([1.,1.,1.])) -> List[Tuple]:
+        """
+        Flip the data points along each axis.
+    
+        Parameters
+        ----------
+        v : np.ndarray, optional
+            The scaling factors along each axis, by default np.array([1., 1., 1.]).
+            
+        Returns
+        -------
+        List[Tuple]
+            A list containing information about the flip event.
+    
+        """
         self.P *= v
         return [(len(self.events), self.flip.__name__), ("flip", v)]
     
     @update
     def cut(self, ax: str = None, lo: float = -np.inf, up: float = np.inf,
             tol=1e-8, out=False) -> None:
+        """
+        Cut data points along a specified axis within a given range.
+    
+        Parameters
+        ----------
+        ax : str, optional
+            The axis to cut along (choose from 'x', 'y', 'z'), by default None.
+        lo : float, optional
+            The lower bound for cutting, by default -np.inf.
+        up : float, optional
+            The upper bound for cutting, by default np.inf.
+        tol : float, optional
+            The tolerance for considering values close to bounds, by default 1e-8.
+        out : bool, optional
+            If True, keep the points outside the specified range, by default False.
+    
+        Returns
+        -------
+        List[Tuple]
+            A list containing information about the cut event.
+    
+        Raises
+        ------
+        KeyError
+            If the specified axis is not valid.
+        ValueError
+            If the resulting cloud has no points after cutting.
+    
+        """
         ax2id = {"x": 0, "y": 1, "z": 2}
-        
         try:
             iax = ax2id[ax]
         except KeyError as KE:
@@ -93,17 +179,13 @@ class Cloud:
         c1 = np.where((self.P[:, iax] > lo) & (self.P[:, iax] < up))[0]
         c2 = np.where(np.isclose(self.P[:, iax], lo, atol=tol))[0]
         c3 = np.where(np.isclose(self.P[:, iax], up, atol=tol))[0]
-        
         met = np.concatenate([c1, c2, c3])
-
         if out:
             met = np.array(list(set(range(0, self.N)) - set(met)))
         
         self.P = self.P[met]
-        
         if self.P.shape[0] == 0:
             raise ValueError("The cloud has no points.")
-
         else:        
             return [(len(self.events), self.cut.__name__), ("axis", ax),
                     ("lower bnd", lo),
