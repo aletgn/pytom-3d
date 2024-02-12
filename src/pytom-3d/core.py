@@ -3,7 +3,6 @@ import pandas as pd
 from numpy import cos, sin
 from typing import List, Tuple
 from util import update
-# from numpy.linalg import svd, det
 # from fancy_log import milestone as ml
 # from fancy_log import single_operation as so
 # import matplotlib.pyplot as plt
@@ -32,7 +31,7 @@ class Cloud:
         """
         self.name = name
         self.file_path = file_path
-        self.P = reader(self.file_path, **reader_args).to_numpy(dtype=np.float128)
+        self.P = reader(self.file_path, **reader_args).to_numpy(dtype=np.float64)
         self.N = self.P.shape[0]
         self.m = None
         self.M = None
@@ -61,26 +60,29 @@ class Cloud:
         self.G = self.P.sum(axis=0)/self.N
     
     @update
-    def translate(self, v: np.ndarray = np.array([0,0,0])) -> List[Tuple]:
+    def translate(self, v: np.ndarray = np.array([0,0,0]), aux: bool = False) -> List[Tuple]:
         """
         Translate the data points by the given vector.
-    
+
         Parameters
         ----------
         v : np.ndarray, optional
             The translation vector, by default np.array([0, 0, 0]).
+        aux : bool, optional
+            If True, indicates an auxiliary translation, by default False.
     
         Returns
         -------
         List[Tuple]
             A list containing information about the translation event.
+
         """
         self.P += v
         return [(len(self.events), self.translate.__name__), ("vector", v)]
     
     @update
     def rotate(self, v: np.ndarray = np.array([0.,0.,0.]),
-               t_deg: np.ndarray = np.array([0.,0.,0.])) -> List[Tuple]:
+               t_deg: np.ndarray = np.array([0.,0.,0.]), rot_mat: np.ndarray = None) -> List[Tuple]:
         """
         Rotate the data points about a specified center.
     
@@ -113,11 +115,13 @@ class Cloud:
                       [0, 0, 1]])
         
         R = np.matmul(np.matmul(rx, ry), rz)
+        if rot_mat is not None:
+            R = rot_mat        
         self.translate(v)
         np.matmul(self.P, R)
         self.translate(np.array([-h for h in v]))
         return [(len(self.events), self.rotate.__name__),
-                ("centre", v), ("angles", t_deg)]
+                ("centre", v), ("angles", t_deg), ("rot_mat", R)]
     
     @update
     def flip(self, v: np.ndarray = np.array([1.,1.,1.])) -> List[Tuple]:
@@ -191,10 +195,51 @@ class Cloud:
                     ("lower bnd", lo),
                     ("upper bnd", up),
                     ("exterior", out)]
+    @update
+    def svd(self) -> List[Tuple]:
+        """
+        Perform Singular Value Decomposition (SVD) on the data points.
+    
+        Returns
+        -------
+        List[Tuple]
+            A list containing information about the SVD event.
+    
+        Notes
+        -----
+        The SVD decomposes the data matrix into three matrices U, S, and V,
+        such that P = U * S * V^T. The rotation is applied to align the
+        principal components with the coordinate axes.
+    
+        """
+        U,S,V = np.linalg.svd(self.P)
+        self.rotate(-self.G, rot_mat=V)
+        return [(len(self.events), self.svd.__name__),
+                ("Left prin. mat.", U),
+                ("Right prin. mat.", V),
+                ("Sing val. mat.", S),
+                ("Det sing val. mat.", np.linalg.det(V)),] 
+            
     
     def history(self):
+        """
+        Print the event history.
+    
+        Prints each recorded event in the history list, displaying key-value pairs.
+    
+        Returns
+        -------
+        None
+    
+        Notes
+        -----
+        Each event is separated by a line of dashes for better readability.
+        """
         for h in self.events:
-            print(h)
+            print("-------------------------------------------------------")
+            for k in h.keys():
+                print( k, h[k])
+            print("-------------------------------------------------------")
     
     def __len__(self):
         return self.P.shape[0]
@@ -223,105 +268,10 @@ if __name__ == "__main__":
     # print(c)
     c.cut("y")
     # print(c)
-    print(c)
+    # print(c)
+    c.svd()
     c.history()
-# class point_cloud:
-#     def __init__(self, file_name, col_x, col_y, col_z, col_sep, **add_params):
-#         """
-#         Parameters
-#         ----------
-#         data_file : str
-#             name of the input file containing the data set of the point cloud. 
-#             file_name must be structured by columns. On the other hand, each 
-#             row of the file must identify a single sample of the point cloud.            
-#             Although file_name can include any number of columns, three of them 
-#             should clearly identify x-,y- and z-coordinates of the point cloud,
-#             regardless of their order. In fact, one can extract the 
-#             correspondent column by specifying the appropriate col_* index, 
-#             see below. Please note that the input file must not contain any 
-#             header line.
-#         col_x : int
-#             index of the column containing the x-coordinates of the point cloud.
-#         col_y : int
-#             index of the column containing the y-coordinates of the point cloud.
-#         col_z : int
-#             index of the column containing the z-coordinates of the point cloud.
-#         col_sep : str
-#             column separator
-#         add_params: dictionary
-#             this argument represents additional parameters. The following can 
-#             be specified:
-#                 - cloud_label, in order to name the acquired point cloud
 
-#         Returns
-#         -------
-#         None.
-
-#         Notes
-#         ------
-#         For the sake of the numerical implementation bear in mind:
-#             - x -> 0;
-#             - y -> 1;
-#             - z -> 2.
-#         Raw data is stored in the attribute raw_data, which is a Nx3 numpy
-#         array (N is the total number of rows in data_file).
-#         The attribute data contains the manipulated data, which is consistently
-#         updated throughout the manipulation process. 
-#         """
-#         self.file_name = file_name
-#         self.raw_data  = np.loadtxt(self.file_name, delimiter=col_sep)
-#         self.data = np.array([self.raw_data[:,col_x],
-#                               self.raw_data[:,col_y],
-#                               self.raw_data[:,col_z]]).T
-#         if add_params.get('cloud_label'):
-#             self.cloud_label = add_params['cloud_label']
-#         else:
-#             self.cloud_label = file_name
-#         #
-#         # cloud extrema
-#         #
-#         self.x_min = None
-#         self.y_min = None
-#         self.z_min = None
-#         self.x_max = None
-#         self.y_max = None
-#         self.z_max = None
-#         #
-#         # cloud centroid
-#         #
-#         self.x_g = None
-#         self.y_g = None
-#         self.z_g = None       
-
-    
-#     def cloud_svd(self):
-#         """
-#         Let the point cloud data stored in self.data be represented by the 
-#         matrix M. This method carries out a sequence of operations:                
-        
-#         1) update centroid 
-#         2) translation to the -centroid
-#         3) Singular Value Decomposition (SVD): M = U*S*V
-#         4) Rotation according to the right principal matrix (V)
-#         5) translation to centroid to restore the cloud position 
-    
-#         Returns
-#         -------
-#         None.
-
-#         """
-#         log_level = 1
-#         self.translate_cloud(-np.array([self.x_g,self.y_g,self.z_g]))
-#         ml('PERFORMING SINGULAR VALUE DECOMPOSITION', log_level)
-#         U,S,V = svd(self.data)
-#         so('Right principal matrix\n', log_level,V)
-#         so('Determinant of right principal matrix', log_level, det(V))
-#         so('Singular values', log_level, S)
-#         self.data = np.array([np.matmul(V,p) for p in self.data])
-#         self.translate_cloud(np.array([self.x_g,self.y_g,self.z_g]))
-#         self.compute_extrema()
-#         self.compute_centroid()
-        
 
 # def cloud_views_2d(*cloud_list):
 #     msize = 0.4
@@ -379,18 +329,3 @@ if __name__ == "__main__":
 #                         marker="o",label=c.cloud_label)
 #     ax.legend(loc='upper center',ncol=len(cloud_list)+1)#, bbox_to_anchor=(0.5,1.5))
 #     plt.show()
-
-# if __name__ == '__main__':
-#     cloud = point_cloud('data_set.txt', 2, 1, 0, ',', cloud_label = 'cloud_1')
-#     cloud.compute_extrema()
-#     cloud.compute_centroid()
-#     cloud1 = point_cloud('data_set.txt', 2, 1, 0, ',')
-#     cloud1.flip_cloud(1)
-#     # cloud.flip_cloud(2)
-#     # cloud.translate_cloud(np.array([50,100,-100]))
-#     # cloud.rotate_cloud([0, 0, 0], 1, 0)
-#     cloud_view_3d(cloud,cloud1)
-#     cloud.cloud_svd()
-#     cloud_view_3d(cloud,cloud1)
-#     # cloud.cutoff_cloud(1, [0, 25])
-#     cloud_views_2d(cloud,cloud1) 
