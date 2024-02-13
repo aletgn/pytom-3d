@@ -2,7 +2,7 @@ import numpy as np
 # import pandas as pd
 from numpy import cos, sin
 from typing import List, Tuple
-from util import update
+from pytom3d.util import update
 # from fancy_log import milestone as ml
 # from fancy_log import single_operation as so
 # import matplotlib.pyplot as plt

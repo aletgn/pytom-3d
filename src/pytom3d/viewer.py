@@ -1,4 +1,4 @@
-from core import Topography
+from pytom3d.core import Topography
 # from util import summation, distance, distance2
 from matplotlib import pyplot as plt
 from typing import List
@@ -37,7 +37,7 @@ class Viewer:
         fig = plt.figure(dpi=300)
         ax = fig.add_subplot(1, 1, 1, projection='3d')
         for d in data:
-            ax.scatter3D(d.P[:,0], d.P[:,1], d.P[:,2])
+            ax.scatter3D(d.P[:,0], d.P[:,1], d.P[:,2], s=3)
         ax.set_xlabel("x")
-        ax.set_xlabel("y")
-        ax.set_xlabel("z")
+        ax.set_ylabel("y")
+        ax.set_zlabel("z")
