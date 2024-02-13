@@ -343,8 +343,6 @@ def summation(x,y):
 def distance(x,y):
     return (x**2+y**2)**0.5
     
-# def main():
-#     pass
 
 if __name__ == "__main__":
     
