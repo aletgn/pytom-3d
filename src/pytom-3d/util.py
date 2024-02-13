@@ -6,9 +6,18 @@ def save():
 def load():
     pass
 
+def summation(x,y):
+    return x+y
+
+def distance(x,y):
+    return (x**2+y**2)**0.5
+
+def distance2(x,y):
+    return (abs(2*x)+y**2)**0.5
+
 def update(method: callable):
     """
-    Decorator to update edges, centroid, and record history after executing a method.
+    Decorator to update edges, centroid, cardinality, and record history after executing a method.
 
     Parameters
     ----------
@@ -29,7 +38,7 @@ def update(method: callable):
     @functools.wraps(method)
     def wrapper(self, *args, **kwargs) -> None:
         """
-        Wrapper function to update edges, centroid, and record history.
+        Wrapper function to update edges, centroid, cardinality, and record history.
          
         Parameters
         ----------

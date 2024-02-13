@@ -1,5 +1,5 @@
 import numpy as np
-import pandas as pd
+# import pandas as pd
 from numpy import cos, sin
 from typing import List, Tuple
 from util import update
@@ -138,7 +138,7 @@ class Topography:
         if rot_mat is not None:
             R = rot_mat        
         self.translate(v)
-        np.matmul(self.P, R)
+        self.P = np.matmul(self.P, R)
         self.translate(np.array([-h for h in v]))
         return [(len(self.history_), self.rotate.__name__),
                 ("centre", v), ("angles", t_deg), ("rot_mat", R)]
@@ -266,6 +266,28 @@ class Topography:
                 print( k, h[k])
             print("-------------------------------------------------------")
     
+    def export(self, path_to_file: str, filename: str, extension: str = ".csv", delimiter: str = ",") -> None:
+        """
+        Export the grid points to a file in CSV format.
+    
+        Parameters
+        ----------
+        path_to_file : str
+            The path to the directory where the file will be saved.
+        filename : str
+            The name of the file (without extension).
+        extension : str, optional
+            The file extension (default is ".csv").
+        delimiter : str, optional
+            The delimiter used in the CSV file (default is ",").
+    
+        Returns
+        -------
+        None
+        """
+        np.savetxt(path_to_file + filename + extension, self.P, delimiter=delimiter)
+
+    
     def __len__(self):
         return self.P.shape[0]
     
@@ -277,6 +299,21 @@ class Topography:
         s_g = f"G: {self.G}\n"
         s_ = f"{self.P}\n"
         return s_name+s_len+s_min+s_max+s_g+s_
+    
+    def __add__(self, topography):
+        """
+        Concatenate the points of the current grid with the points of another topography.
+    
+        Parameters
+        ----------
+        topography : Grid
+            Another instance of the Grid class whose points will be concatenated with the current grid.
+    
+        Returns
+        -------
+        None
+        """
+        self.P = np.concatenate([self.P, topography.P])
 
 
 class Grid(Topography):
@@ -336,92 +373,3 @@ class Grid(Topography):
         self.P[:,2] = fxy(self.P[:,0], self.P[:,1])
         if std_noise is not None:
             self.P[:,2] += np.random.normal(loc=0, scale=std_noise, size=self.P.shape[0])
-    
-def summation(x,y):
-    return x+y
-
-def distance(x,y):
-    return (x**2+y**2)**0.5
-    
-
-if __name__ == "__main__":
-    
-    # c = Cloud()
-    # c.read("../../data/test_data.csv", pd.read_csv, header=None, index_col=False)
-    
-    # # c = Cloud("../../data/test_data.csv", pd.read_csv, name="test",
-    # #           header=None, index_col=False)
-    # # print(c)
-    # c.translate(v=[1.,2.,3.])
-    # # print(c)
-    # c.flip([1.,-1.,-1.])
-    # # print(c)
-    # c.rotate([0,0,0], [90, 90 ,0])
-    # # print(c)
-    # c.cut("y")
-    # # print(c)
-    # # print(c)
-    # c.svd()
-    # c.history()
-    
-    # g = Grid([0,10], [0,10], 10, 10)
-    g = Grid()
-    g.make([0,10], [0,10], 2, 2)
-    g.add(summation, 10)
-
-# def cloud_views_2d(*cloud_list):
-#     msize = 0.4
-#     fig, ax = plt.subplots(nrows=2, ncols=2, dpi=300)
-#     for c in cloud_list:
-#         coord = c.data
-#         ax[0,0].plot(coord[:,0],coord[:,1],'o',
-#                       markersize=msize,
-#                       picker=True,
-#                       pickradius=5,label = c.cloud_label)
-#         ax[0,0].set_xlabel('x [mm]')
-#         ax[0,0].set_ylabel('y [mm]')
-#         ax[0,0].grid('True')
-#         #
-#         ax[0,1].plot(coord[:,1],coord[:,2],'o',
-#                       markersize=msize,
-#                       picker=True,
-#                       pickradius=5)
-#         ax[0,1].set_xlabel('y [mm]')
-#         ax[0,1].set_ylabel('z [mm]')
-#         ax[0,1].grid('True')
-#         #
-#         ax[1,0].plot(coord[:,0],coord[:,2],'o',
-#                       markersize=msize,
-#                       picker=True,
-#                       pickradius=5)
-#         ax[1,0].set_xlabel('x [mm]')
-#         ax[1,0].set_ylabel('z [mm]')
-#         ax[1,0].grid('True')
-#     ax[0,0].legend(loc='upper center',ncol=len(cloud_list)+1, bbox_to_anchor=(0.5,1.5))
-#     fig.delaxes(ax[1,1])
-#     fig.tight_layout(pad=1)
-#     plt.show()
-    
-# def cloud_view_3d(*cloud_list):
-#     fig = plt.figure(figsize=plt.figaspect(1.2),dpi=300)#figsize=plt.figaspect(1))
-#     ax = fig.add_subplot(1, 1, 1, projection='3d')
-#     ax.set_xlabel('$x_i$ [mm]')
-#     ax.set_ylabel('$y_i$ [mm]')
-#     ax.set_zlabel('$z_i$ [mm]')
-#     ax.xaxis.pane.fill = False
-#     ax.yaxis.pane.fill = False
-#     ax.zaxis.pane.fill = False
-#     ax.xaxis.pane.set_edgecolor('w')
-#     ax.yaxis.pane.set_edgecolor('w')
-#     ax.zaxis.pane.set_edgecolor('w')
-#     ax.grid(True)
-#     plt.gca().xaxis.set_major_formatter(ticker.StrMethodFormatter("{x:.1f}"))
-#     plt.gca().yaxis.set_major_formatter(ticker.StrMethodFormatter("{x:.1f}"))
-#     plt.gca().zaxis.set_major_formatter(ticker.StrMethodFormatter("{x:.1f}"))
-#     for c in cloud_list:
-#         coord = c.data
-#         ax.scatter(coord[:,0], coord[:,1],coord[:,2],
-#                         s=0.1, #c=coord[:,2], cmap='jet',
-#                         marker="o",label=c.cloud_label)
-#     ax.legend(loc='upper center',ncol=len(cloud_list)+1)#, bbox_to_anchor=(0.5,1.5))
-#     plt.show()

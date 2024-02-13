@@ -1,4 +1,5 @@
-from core import Topography, Grid, summation, distance
+from core import Topography
+# from util import summation, distance, distance2
 from matplotlib import pyplot as plt
 from typing import List
 
@@ -21,8 +22,8 @@ class Viewer:
             plt.subplot(222)
             plt.scatter(d.P[:,0], d.P[:,2], s=3)
             plt.title('xz plane')
-            plt.xlabel('x-axis')
-            plt.ylabel('z-axis')
+            plt.xlabel('x')
+            plt.ylabel('z')
              
             # YZ plane
             plt.subplot(223)
@@ -30,8 +31,7 @@ class Viewer:
             plt.title('yz plane')
             plt.xlabel('y')
             plt.ylabel('z')
-        
-        plt.subplots_adjust(wspace=0.8, hspace=0.8)
+        plt.gcf().tight_layout(pad=1)
     
     def scatter3D(self, data: List[Topography]):
         fig = plt.figure(dpi=300)
@@ -41,18 +41,3 @@ class Viewer:
         ax.set_xlabel("x")
         ax.set_xlabel("y")
         ax.set_xlabel("z")
-        
-        
-        
-        
-        
-if __name__ == "__main__":
-    g = Grid()
-    g.make([-5,5], [-5,5], 9, 9)
-    g.add(distance, None)
-    
-    v = Viewer()
-    
-    v.views2D([g])
-    
-    
