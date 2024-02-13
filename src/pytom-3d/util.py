@@ -56,9 +56,10 @@ def update(method: callable):
         # retrive values the method returns
         data = method(self, *args, **kwargs)
         
-        # update edges and centroid
+        # update edges, centroid, and cardinality
         self.edges()
         self.centroid()
+        self.cardinality()
         
         # structure data for history
         event = {}

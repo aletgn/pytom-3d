@@ -8,11 +8,33 @@ from util import update
 # import matplotlib.pyplot as plt
 # from matplotlib import ticker
 
-class Cloud:
+class Topography:
     
-    def __init__(self, file_path: str, reader: callable, name: str = "unnamed", **reader_args) -> None:
+    def __init__(self, name: str = "unnamed")-> None:
         """
         Initialize the Cloud instance.
+
+        Parameters
+        ----------
+        name : str, optional
+            The name of the instance, by default "unnamed".
+
+        Returns
+        -------
+        None
+        """
+        self.name = name
+        self.file_path = None
+        self.P = None
+        self.N = None
+        self.m = None
+        self.M = None
+        self.G = None
+        self.history_ = []
+        
+    def read(self, file_path: str, reader: callable, **reader_args):
+        """
+        Read data from file.
 
         Parameters
         ----------
@@ -20,8 +42,6 @@ class Cloud:
             The path to the file.
         reader : callable
             A callable pandas reader function to read data from the file.
-        name : str, optional
-            The name of the instance, by default "unnamed".
         **reader_args
             Additional arguments to pass to the reader.
 
@@ -29,14 +49,14 @@ class Cloud:
         -------
         None
         """
-        self.name = name
         self.file_path = file_path
         self.P = reader(self.file_path, **reader_args).to_numpy(dtype=np.float64)
+        self.cardinality()
+        self.edges()
+        self.centroid()
+    
+    def cardinality(self):
         self.N = self.P.shape[0]
-        self.m = None
-        self.M = None
-        self.G = None
-        self.history_ = []
     
     def edges(self) -> None:
         """
@@ -223,6 +243,8 @@ class Cloud:
     def regression(regressor, **args):
         pass
     
+    def predict():
+        pass    
     
     def history(self):
         """
@@ -252,33 +274,102 @@ class Cloud:
         s_len = f"LEN: {self.N}\n"
         s_min = f"MIN: {self.m}\n"
         s_max = f"MAX: {self.M}\n"
+        s_g = f"G: {self.G}\n"
         s_ = f"{self.P}\n"
-        return s_name+s_len+s_min+s_max+s_
+        return s_name+s_len+s_min+s_max+s_g+s_
 
 
-class Grid():
+class Grid(Topography):
     
+    def __init__(self, name: str = "unnamed") -> None:
+        super().__init__(name)
+        
+    def make(self, x_bounds: List[float], y_bounds: List[float],
+             x_res: int = 10, y_res: int = 10) -> None:
+        """
+        Initializes the grid within specified x and y bounds with given resolution.
 
-def main():
-    pass
+        Parameters
+        ----------
+        x_bounds : list of float
+            The bounds for the x-axis [x_min, x_max].
+        y_bounds : list of float
+            The bounds for the y-axis [y_min, y_max].
+        x_res : int, optional
+            The resolution of the grid along the x-axis (default is 10).
+        y_res : int, optional
+            The resolution of the grid along the y-axis (default is 10).
+            
+        Notes
+        -----
+        z-value is initialli set to zero.
+        
+        Returns
+        -------
+        None
+        """
+        x, y = np.meshgrid(np.linspace(x_bounds[0], x_bounds[1], x_res),
+                            np.linspace(y_bounds[0], y_bounds[1], y_res))
+        x = x.flatten()
+        y = y.flatten()
+        z = np.zeros(shape=x.shape)
+        self.P = np.vstack([x,y,z]).T
+        self.cardinality()
+        self.edges()
+        self.centroid()
+        
+    def add(self, fxy: callable, std_noise = None):
+        """
+        Adds a function-generated z-coordinate to the grid points.
+
+        Parameters
+        ----------
+        fxy : callable
+            A function that takes x and y coordinates and returns z.
+        std_noise : float or None, optional
+            Standard deviation of Gaussian noise to be added to z (default is None).
+
+        Returns
+        -------
+        None
+        """
+        self.P[:,2] = fxy(self.P[:,0], self.P[:,1])
+        if std_noise is not None:
+            self.P[:,2] += np.random.normal(loc=0, scale=std_noise, size=self.P.shape[0])
+    
+def summation(x,y):
+    return x+y
+
+def distance(x,y):
+    return (x**2+y**2)**0.5
+    
+# def main():
+#     pass
 
 if __name__ == "__main__":
     
-    c = Cloud("../../data/test_data.csv", pd.read_csv, name="test",
-              header=None, index_col=False)
-    # print(c)
-    c.translate(v=[1.,2.,3.])
-    # print(c)
-    c.flip([1.,-1.,-1.])
-    # print(c)
-    c.rotate([0,0,0], [90, 90 ,0])
-    # print(c)
-    c.cut("y")
-    # print(c)
-    # print(c)
-    c.svd()
-    c.history()
-
+    # c = Cloud()
+    # c.read("../../data/test_data.csv", pd.read_csv, header=None, index_col=False)
+    
+    # # c = Cloud("../../data/test_data.csv", pd.read_csv, name="test",
+    # #           header=None, index_col=False)
+    # # print(c)
+    # c.translate(v=[1.,2.,3.])
+    # # print(c)
+    # c.flip([1.,-1.,-1.])
+    # # print(c)
+    # c.rotate([0,0,0], [90, 90 ,0])
+    # # print(c)
+    # c.cut("y")
+    # # print(c)
+    # # print(c)
+    # c.svd()
+    # c.history()
+    
+    # g = Grid([0,10], [0,10], 10, 10)
+    g = Grid()
+    g.make([0,10], [0,10], 2, 2)
+    g.add(summation, 10)
 
 # def cloud_views_2d(*cloud_list):
 #     msize = 0.4
