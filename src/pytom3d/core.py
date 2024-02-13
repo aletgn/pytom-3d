@@ -32,6 +32,8 @@ class Topography:
         self.G = None
         self.history_ = []
         
+        self.regressor = None
+        
     def read(self, file_path: str, reader: callable, **reader_args):
         """
         Read data from file.
@@ -238,13 +240,7 @@ class Topography:
                 ("U", U),
                 ("V", V),
                 ("S", S),
-                ("det_S", np.linalg.det(V)),] 
-    
-    def regression(regressor, **args):
-        pass
-    
-    def predict():
-        pass    
+                ("det_S", np.linalg.det(V)),]   
     
     def history(self):
         """
@@ -287,6 +283,12 @@ class Topography:
         """
         np.savetxt(path_to_file + filename + extension, self.P, delimiter=delimiter)
 
+    def fit(self, regressor, **args):
+        self.regressor = regressor
+        self.regressor.fit(self.P[:,0:2], self.P[:,2])
+        
+    def pred(self, X):
+        return self.regressor.predict(X, return_std=True)
     
     def __len__(self):
         return self.P.shape[0]
@@ -373,3 +375,9 @@ class Grid(Topography):
         self.P[:,2] = fxy(self.P[:,0], self.P[:,1])
         if std_noise is not None:
             self.P[:,2] += np.random.normal(loc=0, scale=std_noise, size=self.P.shape[0])
+            
+    def get_grid(self, xy, z):
+        self.P = np.vstack([xy.T, z]).T
+        self.cardinality()
+        self.edges()
+        self.centroid()
