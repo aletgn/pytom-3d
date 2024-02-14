@@ -32,6 +32,7 @@ class Viewer:
             plt.xlabel('y')
             plt.ylabel('z')
         plt.gcf().tight_layout(pad=1)
+        plt.show()
     
     def scatter3D(self, data: List[Topography]):
         fig = plt.figure(dpi=300)
@@ -41,3 +42,4 @@ class Viewer:
         ax.set_xlabel("x")
         ax.set_ylabel("y")
         ax.set_zlabel("z")
+        plt.show()

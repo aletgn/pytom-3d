@@ -56,6 +56,65 @@ class Topography:
         self.cardinality()
         self.edges()
         self.centroid()
+        
+    def make_grid(self, x_bounds: List[float], y_bounds: List[float],
+             x_res: int = 10, y_res: int = 10) -> None:
+        """
+        Initializes the grid within specified x and y bounds with given resolution.
+
+        Parameters
+        ----------
+        x_bounds : list of float
+            The bounds for the x-axis [x_min, x_max].
+        y_bounds : list of float
+            The bounds for the y-axis [y_min, y_max].
+        x_res : int, optional
+            The resolution of the grid along the x-axis (default is 10).
+        y_res : int, optional
+            The resolution of the grid along the y-axis (default is 10).
+            
+        Notes
+        -----
+        z-value is initialli set to zero.
+        
+        Returns
+        -------
+        None
+        """
+        x, y = np.meshgrid(np.linspace(x_bounds[0], x_bounds[1], x_res),
+                            np.linspace(y_bounds[0], y_bounds[1], y_res))
+        x = x.flatten()
+        y = y.flatten()
+        z = np.zeros(shape=x.shape)
+        self.P = np.vstack([x,y,z]).T
+        self.cardinality()
+        self.edges()
+        self.centroid()
+        
+    def add_points(self, fxy: callable, std_noise = None):
+        """
+        Adds a function-generated z-coordinate to the grid points.
+
+        Parameters
+        ----------
+        fxy : callable
+            A function that takes x and y coordinates and returns z.
+        std_noise : float or None, optional
+            Standard deviation of Gaussian noise to be added to z (default is None).
+
+        Returns
+        -------
+        None
+        """
+        self.P[:,2] = fxy(self.P[:,0], self.P[:,1])
+        if std_noise is not None:
+            self.P[:,2] += np.random.normal(loc=0, scale=std_noise, size=self.P.shape[0])
+        
+    def get_grid(self, xy, z):
+        self.P = np.vstack([xy.T, z]).T
+        self.cardinality()
+        self.edges()
+        self.centroid()
     
     def cardinality(self):
         self.N = self.P.shape[0]
@@ -316,68 +375,3 @@ class Topography:
         None
         """
         self.P = np.concatenate([self.P, topography.P])
-
-
-class Grid(Topography):
-    
-    def __init__(self, name: str = "unnamed") -> None:
-        super().__init__(name)
-        
-    def make(self, x_bounds: List[float], y_bounds: List[float],
-             x_res: int = 10, y_res: int = 10) -> None:
-        """
-        Initializes the grid within specified x and y bounds with given resolution.
-
-        Parameters
-        ----------
-        x_bounds : list of float
-            The bounds for the x-axis [x_min, x_max].
-        y_bounds : list of float
-            The bounds for the y-axis [y_min, y_max].
-        x_res : int, optional
-            The resolution of the grid along the x-axis (default is 10).
-        y_res : int, optional
-            The resolution of the grid along the y-axis (default is 10).
-            
-        Notes
-        -----
-        z-value is initialli set to zero.
-        
-        Returns
-        -------
-        None
-        """
-        x, y = np.meshgrid(np.linspace(x_bounds[0], x_bounds[1], x_res),
-                            np.linspace(y_bounds[0], y_bounds[1], y_res))
-        x = x.flatten()
-        y = y.flatten()
-        z = np.zeros(shape=x.shape)
-        self.P = np.vstack([x,y,z]).T
-        self.cardinality()
-        self.edges()
-        self.centroid()
-        
-    def add(self, fxy: callable, std_noise = None):
-        """
-        Adds a function-generated z-coordinate to the grid points.
-
-        Parameters
-        ----------
-        fxy : callable
-            A function that takes x and y coordinates and returns z.
-        std_noise : float or None, optional
-            Standard deviation of Gaussian noise to be added to z (default is None).
-
-        Returns
-        -------
-        None
-        """
-        self.P[:,2] = fxy(self.P[:,0], self.P[:,1])
-        if std_noise is not None:
-            self.P[:,2] += np.random.normal(loc=0, scale=std_noise, size=self.P.shape[0])
-            
-    def get_grid(self, xy, z):
-        self.P = np.vstack([xy.T, z]).T
-        self.cardinality()
-        self.edges()
-        self.centroid()
