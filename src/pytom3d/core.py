@@ -3,10 +3,6 @@ import numpy as np
 from numpy import cos, sin
 from typing import List, Tuple
 from pytom3d.util import update
-# from fancy_log import milestone as ml
-# from fancy_log import single_operation as so
-# import matplotlib.pyplot as plt
-# from matplotlib import ticker
 
 class Topography:
     

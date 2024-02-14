@@ -2,6 +2,7 @@ from pytom3d.core import Topography
 # from util import summation, distance, distance2
 from matplotlib import pyplot as plt
 from typing import List
+from matplotlib import ticker
 
 class Viewer:
     
@@ -42,4 +43,14 @@ class Viewer:
         ax.set_xlabel("x")
         ax.set_ylabel("y")
         ax.set_zlabel("z")
+        ax.xaxis.pane.set_color('w')
+        ax.yaxis.pane.set_edgecolor('w')
+        ax.zaxis.pane.set_edgecolor('w')
+        ax.xaxis.pane.set_color('w')
+        ax.yaxis.pane.set_color('w')
+        ax.zaxis.pane.set_color('w')
+        ax.grid(True)
+        plt.gca().xaxis.set_major_formatter(ticker.StrMethodFormatter("{x:.0f}"))
+        plt.gca().yaxis.set_major_formatter(ticker.StrMethodFormatter("{x:.0f}"))
+        plt.gca().zaxis.set_major_formatter(ticker.StrMethodFormatter("{x:.2f}"))
         plt.show()
