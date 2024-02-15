@@ -2,6 +2,7 @@ from pytom3d.core import Topography
 # from util import summation, distance, distance2
 from matplotlib import pyplot as plt
 from typing import List
+import matplotlib
 from matplotlib import ticker
 import numpy as np
 
@@ -113,13 +114,74 @@ class Viewer:
                             pad=0.12, format="%.2f",
                             ticks=list(np.linspace(vmin,
                                                    vmax, 11)),
-                            label='$Altitude$')
+                            label='Altitude')
         cbar.ax.tick_params(direction='in', right=1, left=1, size=2.5)
         
         ax.axis('tight')
         plt.show()
 
-    # def scatter3DRegression(self, regression: List[Topography], uncertainty: np.ndarray = None, reference: Topography = None) -> None:
-    #     pass
+    def scatter3DRegression(self, regression: Topography, reference: Topography = None) -> None:
+        fig = plt.figure(dpi=300)
+        ax = fig.add_subplot(1, 1, 1, projection='3d')
         
+        ax.set_xlabel("x [mm]")
+        ax.set_ylabel("y [mm]")
+        ax.set_zlabel("z [mm]")
+
+        ax.xaxis.pane.set_color('w')
+        ax.yaxis.pane.set_edgecolor('w')
+        ax.zaxis.pane.set_edgecolor('w')
+        ax.xaxis.pane.set_color('w')
+        ax.yaxis.pane.set_color('w')
+        ax.zaxis.pane.set_color('w')
+
+        plt.gca().xaxis.set_major_formatter(ticker.StrMethodFormatter("{x:.0f}"))
+        plt.gca().yaxis.set_major_formatter(ticker.StrMethodFormatter("{x:.1f}"))
+        plt.gca().zaxis.set_major_formatter(ticker.StrMethodFormatter("{x:.2f}"))
+
+        ax.grid(True)
+        from matplotlib import cm
+        vmin = regression.unc.min()
+        vmax = regression.unc.max()
+
+        # ax.scatter3D(regression.P[:, 0], regression.P[:, 1], regression.P[:, 2], s=2, alpha=1, c=regression.unc)
+        su = ax.plot_trisurf(regression.P[:, 0], regression.P[:, 1], regression.P[:, 2],
+                             alpha=1, cmap="RdYlBu", edgecolor=None, antialiased=True)
+
+        sm = plt.cm.ScalarMappable(cmap="RdYlBu")
+        sm.set_array(regression.unc)
+
+        cbar = fig.colorbar(sm, ax=ax, orientation="vertical",
+                            pad=0.12, format="%.3f",
+                            ticks=list(np.linspace(vmin, vmax, 11)),
+                            label='Uncertainty')
+        cbar.ax.tick_params(direction='in', right=1, left=1, size=2.5)
+        ax.scatter3D(reference.P[:, 0], reference.P[:, 1], reference.P[:, 2], s=2, alpha=1)
+
+        ax.axis('tight')
+        plt.show()
+
+def cfg_matplotlib(font_size: int = 12, font_family: str = 'sans-serif', use_latex: bool = False) -> None:
+    """
+    Set Matplotlib RC parameters for font size, font family, and LaTeX usage.
+
+    Parameters
+    ----------
+    font_size : int, optional
+        Font size. The default is 12.
+
+    font_family : str, optional
+        Font family. The default is 'sans-serif'.
+
+    use_latex : bool, optional
+        Enable LaTeX text rendering. The default is False.
+
+    Returns
+    -------
+    None
+
+    """
+    matplotlib.rcParams['font.size'] = font_size
+    matplotlib.rcParams['font.family'] = font_family
+    matplotlib.rcParams['text.usetex'] = use_latex
     

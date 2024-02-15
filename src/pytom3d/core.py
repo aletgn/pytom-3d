@@ -109,8 +109,9 @@ class Topography:
         self.edges()
         self.centroid()
         
-    def get_grid(self, xy, z):
-        self.P = np.vstack([xy.T, z]).T
+    def get_topography(self, x, y, z, unc: np.ndarray = None):
+        self.P = np.vstack([x, y, z]).T
+        self.unc = unc
         self.cardinality()
         self.edges()
         self.centroid()
