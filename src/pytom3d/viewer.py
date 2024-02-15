@@ -140,12 +140,11 @@ class Viewer:
         plt.gca().zaxis.set_major_formatter(ticker.StrMethodFormatter("{x:.2f}"))
 
         ax.grid(True)
-        from matplotlib import cm
         vmin = regression.unc.min()
         vmax = regression.unc.max()
 
         # ax.scatter3D(regression.P[:, 0], regression.P[:, 1], regression.P[:, 2], s=2, alpha=1, c=regression.unc)
-        su = ax.plot_trisurf(regression.P[:, 0], regression.P[:, 1], regression.P[:, 2],
+        ax.plot_trisurf(regression.P[:, 0], regression.P[:, 1], regression.P[:, 2],
                              alpha=1, cmap="RdYlBu", edgecolor=None, antialiased=True)
 
         sm = plt.cm.ScalarMappable(cmap="RdYlBu")
