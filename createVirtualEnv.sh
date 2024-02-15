@@ -6,6 +6,11 @@ WHL_FILE=./dist/pytom3d-0.0.0-py3-none-any.whl
 # Set the desired path for the virtual environment
 VENV_DIR=$HOME/pythonEnv/simulation
 
+# Specify the Python version (change this to your desired version)
+# system-wide 3.8.10
+#PYTHON_VERSION=3.6.5
+PYTHON_VERSION=3.8.10
+
 # Check if the virtual environment directory exists
 if [ -d "$VENV_DIR" ]; then
     echo "Removing existing virtual environment..."
@@ -13,7 +18,7 @@ if [ -d "$VENV_DIR" ]; then
 fi
 
 # Create a new virtual environment
-virtualenv "$VENV_DIR"
+virtualenv --python="$PYTHON_VERSION" "$VENV_DIR"
 
 # Activate the virtual environment
 source "$VENV_DIR/bin/activate"
