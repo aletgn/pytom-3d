@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# Set the path to your .whl file
+WHL_FILE=./dist/pytom3d-0.0.0-py3-none-any.whl
+
+# Set the desired path for the virtual environment
+VENV_DIR=$HOME/pythonEnv/simulation
+
+# Check if the virtual environment directory exists
+if [ -d "$VENV_DIR" ]; then
+    echo "Removing existing virtual environment..."
+    rm -rf "$VENV_DIR"
+fi
+
+# Create a new virtual environment
+virtualenv "$VENV_DIR"
+
+# Activate the virtual environment
+source "$VENV_DIR/bin/activate"
+
+# Install the wheel file using pip
+pip3 install "$WHL_FILE"
+
+# Display a message indicating successful setup
+echo "Virtual environment created and package installed successfully."
+
+# Optionally, deactivate the virtual environment
+#deactivate

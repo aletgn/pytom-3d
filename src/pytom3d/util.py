@@ -1,6 +1,6 @@
 import functools
 import pickle
-from typing import List
+import numpy as np
 
 def summation(x,y):
     return x+y
@@ -10,6 +10,29 @@ def distance(x,y):
 
 def distance2(x,y):
     return (abs(2*x)+y**2)**0.5
+
+def prediction_wrapper(regressor, x, y):
+    """
+    Predict the target variable and its uncertainty for given x and y coordinates using a regressor.
+
+    Parameters
+    ----------
+    regressor : Regressor
+        The trained regressor model.
+    x : float
+        The x-coordinate for prediction.
+    y : float
+        The y-coordinate for prediction.
+
+    Returns
+    -------
+    tuple
+        A tuple containing the predicted value and its associated standard deviation (uncertainty).
+
+    """
+    p = np.array([x,y]).reshape(1,-1)
+    pred, sigma = regressor.predict(p, return_std = True)
+    return pred[0], sigma[0]
 
 def save(obj, folder: str = "./", filename: str = "my_file", extension: str = ".bin") -> None:
     """
