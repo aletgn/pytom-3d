@@ -105,6 +105,9 @@ class Topography:
         self.P[:,2] = fxy(self.P[:,0], self.P[:,1])
         if std_noise is not None:
             self.P[:,2] += np.random.normal(loc=0, scale=std_noise, size=self.P.shape[0])
+        self.cardinality()
+        self.edges()
+        self.centroid()
         
     def get_grid(self, xy, z):
         self.P = np.vstack([xy.T, z]).T

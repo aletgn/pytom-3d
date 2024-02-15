@@ -5,30 +5,47 @@ from os import path as ospath
 
 syspath.append(ospath.join(ospath.expanduser("~"), '/home/ale/Desktop/pytom-3d/src/'))
 # import numpy as np; np.random.seed(0)
-# from pytom3d.core import Topography
-# from pytom3d.viewer import Viewer
+from pytom3d.core import Topography
+from pytom3d.viewer import Viewer
 from pytom3d.util import save, load
 # 
-# def distance3(x,y):
-#     return (x**2)/100000
+def distance3(x,y):
+    return (x**2)/100000
 
-# def distance4(x,y):
-#     return -(x**2)/100000
+def distance4(x,y):
+    return -(x**2)/100000
 
-# l = 200/2
-# H = 37.5/2
-# h = 31.5/2
-# x_res = 25*2
-# y_res = 5*2
+l = 200/2
+H = 37.5/2
+h = 31.5/2
+x_res = 25*2
+y_res = 5*2
 
-# v = Viewer()
-# g_bot = Topography()
-# g_bot.make_grid(x_bounds=[-l,l], y_bounds=[h,H], x_res=x_res, y_res=y_res)
-# g_bot.add_points(distance3, std_noise=0.005)
-# # g_top = Topography()
-# # g_top.make_grid(x_bounds=[-l,l], y_bounds=[-H,-h], x_res=x_res, y_res=y_res)
-# # g_top.add(distance4, std_noise=0.005)
-# # v.scatter3D([g_bot, g_top])
+v = Viewer()
+g_bot = Topography()
+g_bot.make_grid(x_bounds=[-l,l], y_bounds=[h,H], x_res=x_res, y_res=y_res)
+g_bot.add_points(distance3, std_noise=0.005)
+# v.scatter3D([g_bot], x_lim=[-50,50])
+
+g_top = Topography()
+g_top.make_grid(x_bounds=[-l,l], y_bounds=[-H,-h], x_res=x_res, y_res=y_res)
+g_top.add_points(distance4, std_noise=0.005)
+
+
+
+v.scatter3D([g_bot, g_top])
+
+
+
+
+
+
+
+
+
+
+
+# # 
 # # g_bot + g_top
 
 # from sklearn.gaussian_process import GaussianProcessRegressor as gpr
@@ -53,8 +70,3 @@ from pytom3d.util import save, load
 
 # save(g_bot.regressor, extension=".gpr")
 
-import pickle
-folder = "./"
-filename = "my_file.gpr"
-f = load("my_file.gpr")
-f.predict()
