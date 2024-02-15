@@ -1,10 +1,48 @@
 import functools
+import pickle
 
-def save():
-    pass
+def save(obj, folder: str = "./", filename: str = "my_file", extension: str = ".bin") -> None:
+    """
+    Save the given object to a binary file using pickle.
 
-def load():
-    pass
+    Parameters
+    ----------
+    - obj: Any
+        The object to be saved.
+    - folder: str, optional
+        The directory path where the file will be saved. Default is "./".
+    - filename: str, optional
+        The name of the file to be saved. Default is "my_file".
+    - extension: str, optional
+        The file extension. Default is ".bin".
+
+    Returns
+    -------
+    None
+
+    """
+    with open(folder + filename + extension, 'wb') as file:
+        pickle.dump(obj, file)
+
+def load(filename, folder: str = "./"):
+    """
+     Load an object from a binary file using pickle.
+    
+    Parameters
+    ----------
+    - filename: str
+    The name of the file to be loaded.
+    - folder: str, optional
+    The directory path where the file is located. Default is "./".
+    
+    Returns
+    -------
+    Any
+        The loaded object.
+
+    """
+    with open(folder + filename, 'rb') as file:
+        return pickle.load(file)
 
 def summation(x,y):
     return x+y
