@@ -25,15 +25,12 @@ v = Viewer()
 g_bot = Topography()
 g_bot.make_grid(x_bounds=[-l,l], y_bounds=[h,H], x_res=x_res, y_res=y_res)
 g_bot.add_points(distance3, std_noise=0.005)
-# v.scatter3D([g_bot], x_lim=[-50,50])
+v.scatter3D([g_bot])
 
-g_top = Topography()
-g_top.make_grid(x_bounds=[-l,l], y_bounds=[-H,-h], x_res=x_res, y_res=y_res)
-g_top.add_points(distance4, std_noise=0.005)
-
-
-
-v.scatter3D([g_bot, g_top])
+# g_top = Topography()
+# g_top.make_grid(x_bounds=[-l,l], y_bounds=[-H,-h], x_res=x_res, y_res=y_res)
+# g_top.add_points(distance4, std_noise=0.005)
+# v.scatter3D([g_bot, g_top])
 
 
 
@@ -45,8 +42,9 @@ v.scatter3D([g_bot, g_top])
 
 
 
-# # 
-# # g_bot + g_top
+
+
+# g_bot + g_top
 
 # from sklearn.gaussian_process import GaussianProcessRegressor as gpr
 # from sklearn.gaussian_process.kernels import RBF, WhiteKernel, ConstantKernel as C
@@ -61,8 +59,8 @@ v.scatter3D([g_bot, g_top])
 # # g_test.make(x_bounds=[-l,l], y_bounds=[-H,H], x_res=x_res, y_res=50)
 # z, sigma = g_bot.pred(g_bot.P[:,0:2])
 
-# # g_test = Grid()
-# # z, sigma = g_bot.pred(g_tt.P[:,0:2])
+# g_test = Grid()
+# z, sigma = g_bot.pred(g_tt.P[:,0:2])
 # g_test.get_grid(g_bot.P[:,0:2], z)
 
 # v.scatter3D([g_bot, g_test])

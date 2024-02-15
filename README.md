@@ -23,16 +23,30 @@ PyToM-3D is a Python package to transform and fit 3-dimensional topographies. It
 
 - [TO-DO List](#todo-list)
 
-# Geometric Transformations <a name="geometric-transformations"></a>
+# # Initialising a Topography
 
-In order to understand each geometric transformation remember that the points of the topography are stored in the attribute ```P```, which is a $N\times 3$ matrix, say $\mathbf{P}=\left[\mathbf{p}_1\quad \mathbf{p}_2\quad\mathbf{p}_N\right]^\top$, where $\mathbf{p}_i = \left[x_i\quad y_i \quad z_i\right]$ is the *i*th point of the topography.
-
-### Translation <a name="translation"></a>
-
-Let us define a vector $\mathbf{v} = \left[x_v, y_v, z_v \right]$. By calling:
+Initially we need to istantiate a `Topography`:
 
 ```python
-cl.translate_cloud(v)
+t = Topography()
+```
+
+We have a multitude of options:
+
+- reading from a `.csv` file;
+
+- generating a grid and add synthetic data.
+
+# Geometric Transformations <a name="geometric-transformations"></a>
+
+In order to understand each geometric transformation remember that the points of the topography are stored in the attribute ```P```, which is a $N\times 3$ matrix, say $\mathbf{P}=\left[\mathbf{p}_1\quad \mathbf{p}_2\quad\mathbf{p}_N\right]^\top$, where $\mathbf{p}_i = \left[x_i\quad y_i \quad z_i\right]$ is the *i*th point of the topography. In, practice the altitude $z_i$ is determined upon a latent function of the coordinates, hence $z_i = f(x_i, y_i)$.
+
+## Translation <a name="translation"></a>
+
+Let us define a vector $\mathbf{v} = \left[x_v\quad y_v\quad z_v \right]$. By calling:
+
+```python
+t.translate([xv,yv,zv])
 ```
 
 we translate $\mathbf{P}$ by $\mathbf{v}$ as:
@@ -53,29 +67,19 @@ performs a rigid rotation of the point cloud about the *ax* axis, with respect t
 
 and updates the point cloud stored in ```data```.
 
-### Flip <a name="flip"></a>
+## Flip <a name="flip"></a>
 
-This method allows flipping to be performed. Herein, flipping indicates a reflection of the point cloud with respect to a selected axis. Therefore, the coordinate of each point along the selected axis will be replaced by their inverse:
-
-- x |-> -x
-- y |-> -y
-- z |-> -z
-
-You can exploit this method by using:
+This method allows mirroring data with respect to a given vector $\mathbf{v}=\left[v_x\quad v_y\quad v_z \right]$ which represent the outward normal of the intended flipping plane. Therefore each component must be $-1$ or $1$. Assuming one wishes to flip the data about the $yz$ plane, they would define $\mathbf{v}=\left[-1\quad 1\quad 1 \right]$, and call:
 
 ```python
-cl.flip_cloud(ax)
+t.flip([-1,1,1])
 ```
 
-where *ax* is the selected axis, which can assume either 0 (x) or 1 (y) or 2 (z). Formally, let **M**<sub>i</sub>=[x<sub>i</sub>,y<sub>i</sub>,z<sub>i</sub>] the i-th point of the point cloud **M**. The method in question carries out the following operation:
+This operation performs $(\mathbf{p}_i = \left[x_i\quad y_i \quad z_i\right])$:
 
-- [x<sub>i</sub>,y<sub>i</sub>,z<sub>i</sub>] <-| [-x<sub>i</sub>,y<sub>i</sub>,z<sub>i</sub>] for all i
-- [x<sub>i</sub>,y<sub>i</sub>,z<sub>i</sub>] <-| [x<sub>i</sub>,-y<sub>i</sub>,z<sub>i</sub>] for all i
-- [x<sub>i</sub>,y<sub>i</sub>,z<sub>i</sub>] <-| [x<sub>i</sub>,y<sub>i</sub>,-z<sub>i</sub>] for all i
+$\left[x_i\quad y_i \quad z_i\right] \leftarrow \left[x_i\cdot v_x\quad y_i\cdot vy\quad z_i\cdot vz\right] \quad\forall\ i = 1,2,\dots,N.$
 
-in agreement with the selected axis.
-
-### Cut-off <a name="cut-off"></a>
+## Cut-off <a name="cut-off"></a>
 
 Suppose you would like to remove some outliers from your point cloud. For the sake of clarity consider the z-axis, the same procedure applies to the other axes identically. Also, assume two threshold values gathered in the following vector [z<sub>min</sub>, z<sub>max</sub>]. This method enables to keep those points whose z-value belongs to [z<sub>min</sub>, z<sub>max</sub>], thus peforming a cutt-off.
 

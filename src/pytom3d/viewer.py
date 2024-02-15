@@ -100,7 +100,7 @@ class Viewer:
         ax.zaxis.pane.set_color('w')
 
         plt.gca().xaxis.set_major_formatter(ticker.StrMethodFormatter("{x:.0f}"))
-        plt.gca().yaxis.set_major_formatter(ticker.StrMethodFormatter("{x:.0f}"))
+        plt.gca().yaxis.set_major_formatter(ticker.StrMethodFormatter("{x:.1f}"))
         plt.gca().zaxis.set_major_formatter(ticker.StrMethodFormatter("{x:.2f}"))
     
         ax.grid(True)
@@ -119,7 +119,7 @@ class Viewer:
         ax.axis('tight')
         plt.show()
 
-    def scatter3DRegression(self, regression: Topography, uncertainty: np.ndarray = None, reference: Topography = None) -> None:
-        pass
+    # def scatter3DRegression(self, regression: List[Topography], uncertainty: np.ndarray = None, reference: Topography = None) -> None:
+    #     pass
         
     

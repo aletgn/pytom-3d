@@ -1,6 +1,15 @@
 import functools
 import pickle
 
+def summation(x,y):
+    return x+y
+
+def distance(x,y):
+    return (x**2+y**2)**0.5
+
+def distance2(x,y):
+    return (abs(2*x)+y**2)**0.5
+
 def save(obj, folder: str = "./", filename: str = "my_file", extension: str = ".bin") -> None:
     """
     Save the given object to a binary file using pickle.
@@ -43,15 +52,6 @@ def load(filename, folder: str = "./"):
     """
     with open(folder + filename, 'rb') as file:
         return pickle.load(file)
-
-def summation(x,y):
-    return x+y
-
-def distance(x,y):
-    return (x**2+y**2)**0.5
-
-def distance2(x,y):
-    return (abs(2*x)+y**2)**0.5
 
 def update(method: callable):
     """
