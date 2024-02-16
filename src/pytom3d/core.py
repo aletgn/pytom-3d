@@ -48,7 +48,13 @@ class Topography:
         None
         """
         self.file_path = file_path
-        self.P = reader(self.file_path, **reader_args).to_numpy(dtype=np.float64)
+        self.P = reader(self.file_path, **reader_args)
+        
+        try:
+            self.P = reader(self.file_path, **reader_args).to_numpy(dtype=np.float64)
+        except:
+            pass
+        
         self.cardinality()
         self.edges()
         self.centroid()

@@ -1,6 +1,7 @@
 import functools
 import pickle
 import numpy as np
+from typing import Tuple
 
 def summation(x,y):
     return x+y
@@ -11,7 +12,29 @@ def distance(x,y):
 def distance2(x,y):
     return (abs(2*x)+y**2)**0.5
 
-def prediction_wrapper(regressor, x, y):
+def trials(gpr, mesh, n: int = 1, folder: str = "./"):
+
+    for h in range(1,n+1):
+        pred, sigma = gpr.predict(mesh.P[:,0:2], return_std=True)
+        noise = np.random.normal(loc=0, scale=sigma)
+        output = np.vstack([mesh.P[:,0], mesh.P[:,1], mesh.P[:,2], pred, np.clip(max(0,h-1),0,1)*noise]).T
+        np.savetxt(folder+mesh.name+"_" + str(h) +".txt", output)
+        
+def apply_bc(xx, yy, gpr):
+    node_id = np.where(np.isclose(gpr[:,0], xx, atol=1e-8) & np.isclose(gpr[:,1], yy, atol=1e-8))[0]
+    xm = gpr[node_id][0]
+    ym = gpr[node_id][0]
+    
+    print(node_id)
+    print("x:", xm, xx)
+    print("y:", ym, yy)
+    
+    if len(node_id) == 1:
+        return gpr[node_id][0][3] + gpr[node_id][0][4]
+    else:
+        raise Exception("There must be only one node.")
+        
+def prediction_wrapper(regressor, x, y) -> Tuple[np.ndarray]:
     """
     Predict the target variable and its uncertainty for given x and y coordinates using a regressor.
 

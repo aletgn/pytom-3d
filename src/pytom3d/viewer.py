@@ -155,7 +155,9 @@ class Viewer:
                             ticks=list(np.linspace(vmin, vmax, 11)),
                             label='Uncertainty')
         cbar.ax.tick_params(direction='in', right=1, left=1, size=2.5)
-        ax.scatter3D(reference.P[:, 0], reference.P[:, 1], reference.P[:, 2], s=2, alpha=1)
+        
+        if reference is not None:
+            ax.scatter3D(reference.P[:, 0], reference.P[:, 1], reference.P[:, 2], s=2, alpha=1)
 
         ax.axis('tight')
         plt.show()
