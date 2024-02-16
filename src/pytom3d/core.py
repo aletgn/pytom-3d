@@ -268,9 +268,10 @@ class Topography:
             raise KeyError("Axis is not valid") from KE
         
         c1 = np.where((self.P[:, iax] > lo) & (self.P[:, iax] < up))[0]
-        c2 = np.where(np.isclose(self.P[:, iax], lo, atol=tol))[0]
-        c3 = np.where(np.isclose(self.P[:, iax], up, atol=tol))[0]
-        met = np.concatenate([c1, c2, c3])
+        # c2 = np.where(np.isclose(self.P[:, iax], lo, atol=tol))[0]
+        # c3 = np.where(np.isclose(self.P[:, iax], up, atol=tol))[0]
+        # met = np.concatenate([c1, c2, c3])
+        met = c1
         if out:
             met = np.array(list(set(range(0, self.N)) - set(met)))
         
