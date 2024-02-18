@@ -56,23 +56,34 @@ t.translate([xv,yv,zv])
 
 we translate $\mathbf{P}$ by $\mathbf{v}$ as:
 
-$\mathbf{p}_i \leftarrow \mathbf{p}_i + \mathbf{v}\quad\forall\ i = 1,2,\dots,N.$
+$$\mathbf{p}_i \leftarrow \mathbf{p}_i + \mathbf{v}\quad\forall\ i = 1,2,\dots,N.$$
 
 ## Rotation <a name="rotation"></a>
+This method performs the rotation about the centre given three rotation angles $\theta_x$, $\theta_y$, $\theta_z$. The method builds the corresponding rotation matrices:
 
-$$\begin{bmatrix}  a & b & c \\\ d & e & f \\\ g & h & i \\\ \end{bmatrix}$$
+$$\mathbf{R}_x = \begin{bmatrix}  1 & 0 & 0 \\\ 0 & \cos(\theta_x) & \sin(\theta_x) \\\ 0 & -\sin(\theta_x) & \cos(\theta_x) \\\ \end{bmatrix},$$
 
-Let **v** = [x<sub>p</sub>,y<sub>p</sub>,z<sub>p</sub>], *a* and *ax* be a pole, and angle (in degrees) and the axis identifier (0=x, 1=y, 2=z), respectively. Furthermore, according to the chosen axis, assume the correspondent rotation matrix **R**(*a*). The method:
+$$\mathbf{R}_y = \begin{bmatrix}  \cos(\theta_y) & 0 & \sin(\theta_y) \\\ 0 & 1 & 0 \\\ -\sin(\theta_y) & 0 & \cos(\theta_y) \end{bmatrix},$$
+
+$$\mathbf{R}_z = \begin{bmatrix} \cos(\theta_z) & \sin(\theta_z) & 0 \\\  -\sin(\theta_z) & \cos(\theta_z) & 0 \\\ 0 & 0 & 1 \end{bmatrix},$$
+
+$$\mathbf{R} = \mathbf{R}_x\mathbf{R}_y\mathbf{R}_z.$$
+
+Then each point is rotated as:
+
+$$\mathbf{p}_i \leftarrow \mathbf{R}\mathbf{p}_i.$$
+
+This is accomplished via:
 
 ```python
-t.rotate(...)
+t.rotate(t_deg=[t_x, t_y, t_z])
 ```
 
-performs a rigid rotation of the point topography about the *ax* axis, with respect to the pole **p**,  by rotating **M**<sub>i</sub> in agreement with **R**(*a*):
+The method supports passing a rotation matrix too:
 
-**M**<sub>i</sub>   <-|   **R**(*a*)[**M**<sub>i</sub>] for all i
-
-and updates the point topography stored in ```data```.
+```
+t.rotate(rot_mat=R)
+```
 
 ## Flip <a name="flip"></a>
 
@@ -84,13 +95,13 @@ t.flip([-1,1,1])
 
 This operation performs $(\mathbf{p}_i = \left[x_i\quad y_i \quad z_i\right])$:
 
-$\left[x_i\quad y_i \quad z_i\right] \leftarrow \left[x_i\cdot v_x\quad y_i\cdot vy\quad z_i\cdot vz\right] \quad\forall\ i = 1,2,\dots,N.$
+$$\left[x_i\quad y_i \quad z_i\right] \leftarrow \left[x_i\cdot v_x\quad y_i\cdot vy\quad z_i\cdot vz\right] \quad\forall\ i = 1,2,\dots,N.$$
 
 ## Cut <a name="cut"></a>
 
 Suppose you would like to remove some outliers from topography. Although the same procedure applies to the other axes identically, we focus on the z-axis. We also assume two threshold $l$ and $u$, whereby we filter each $i$th datum using the criterion:
 
-$z_i \leftarrow z_i:\quad z_i > l\quad \text{and}\quad z_i < u.$
+$$z_i \leftarrow z_i:\quad z_i > l\quad \text{and}\quad z_i < u.$$
 
 To do so, we call:
 
@@ -100,13 +111,13 @@ t.cut(ax="z", lo=l, up=u, out=False)
 
 If `out=True` the method keep the points complying with:
 
-$z_i \leftarrow z_i:\quad z_i < l\quad \text{and}\quad z_i > u.$
+$$z_i \leftarrow z_i:\quad z_i < l\quad \text{and}\quad z_i > u.$$
 
 # Singular Value Decomposition (SVD) <a name="svd"></a>
 
 Let $\mathbf{P}$ be a generic matrix belonging to $\mathbb{R}^{m\times n}$. SVD allows $\mathbf{P}$ to be decomposed into the product of three matrices:
 
-$\mathbf{P} = \mathbf{U}\mathbf{S}\mathbf{V^\top},$
+$$\mathbf{P} = \mathbf{U}\mathbf{S}\mathbf{V^\top},$$
 
 where $\mathbf{U}\in \mathbb{R}^{m\times m}$ , and $\mathbf{V}^\top\in \mathbb{R}^{n\times n}$ are called respectively *left-* and *right-principal* matrix (both orthonormal), whereas $\mathbf{S}\in \mathbb{R}^{m\times n}$ is the so-called Singular Value Matrix.
 
@@ -116,7 +127,7 @@ Suppose that the points of the topography are distributed according to three pre
 
 In this instance, it is therefore evident that finding this matrix by inspection, intuition or "trial & error" becomes preposterous. SVD holds the potential to compute such a matrix almost automatically. Let $\mathbf{P}\in\mathbb{R}^{N\times 3}$ be the matrix representing the topography. In order to apply the SVD and obtain satisfactory results, the whole point topography should be translated to $-G$ (the centroid). Following, the SVD applied to $\mathbf{P}$ provides $\mathbf{U}\in \mathbb{R}^{N\times N}$ , $\mathbf{S}\in \mathbb{R}^{N\times 3}$, and $\mathbf{V}^\top\in \mathbb{R}^{3\times 3}$.  In particular, $\mathbf{V}$ realises the change of basis. Hence, each point of $\mathbf{P}$, namely $\mathbf{p}_i$, will be rotated according to $\mathbf{V}^\top$:
 
-$\mathbf{p}_i \leftarrow \mathbf{V}^\top\mathbf{p}_i.$
+$$\mathbf{p}_i \leftarrow \mathbf{V}^\top\mathbf{p}_i.$$
 
 We do SVD via:
 
@@ -136,7 +147,7 @@ $t(x,y) = f(x,y) + \epsilon(0, \sigma),$
 
 where $f(x,y)$ is a latent function modelling the topography and $\epsilon$ is Gaussian noise having null mean and $\sigma$ as the standard deviation. Next, a Gaussian Process is placed over $f(x,y)$:
 
-$f \sim GP(M(x,y), K(x,y)),$
+$$f \sim GP(M(x,y), K(x,y)),$$
 
 where $M(x,y)$ is the mean, and $K(x,y)$ is the kernel (covariance function). Initially, we need to define the kernel:
 
@@ -147,11 +158,11 @@ kernel = ConstantKernel() * RBF([1.0, 1.0], (1e-5, 1e5))  WhiteKernel(noise_leve
 
 which represents a typical squared exponential kernel with noise:
 
-$K(\mathbf{x},\mathbf{x}') = C \exp{\left(\frac{\Vert \mathbf{x} - \mathbf{x}'\Vert^2}{l^2}\right)} + \sigma_{ij},$
+$$K(\mathbf{x},\mathbf{x}') = C \exp{\left(\frac{\Vert \mathbf{x} - \mathbf{x}'\Vert^2}{l^2}\right)} + \sigma_{ij},$$
 
 where:
 
-$\sigma_{ij} = \delta_{ij} \epsilon,\quad \mathbf{x}=\left[x,y\right]$
+$$\sigma_{ij} = \delta_{ij} \epsilon,\quad \mathbf{x}=\left[x,y\right]$$
 
 and $\delta_{ij}$ is Kronecker's delta applied to any pair of points $\mathbf{x}_{i}$, $\mathbf{x}_j$.
 
