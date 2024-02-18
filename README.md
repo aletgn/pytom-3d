@@ -56,6 +56,12 @@ $\mathbf{p}_i \leftarrow \mathbf{p}_i + \mathbf{v}\quad\forall\ i = 1,2,\dots,N.
 
 ### Rigid Rotation <a name="rigid-rotation"></a>
 
+$\begin{bmatrix} 1 & 2 & 3 \\\ 1 & 2 & 4 \end{bmatrix}$
+
+
+
+
+
 Let **v** = [x<sub>p</sub>,y<sub>p</sub>,z<sub>p</sub>], *a* and *ax* be a pole, and angle (in degrees) and the axis identifier (0=x, 1=y, 2=z), respectively. Furthermore, according to the chosen axis, assume the correspondent rotation matrix **R**(*a*). The method:
 
 ```python
