@@ -7,7 +7,7 @@ syspath.append(ospath.join(ospath.expanduser("~"), '/home/ale/Desktop/pytom-3d/s
 # import numpy as np; np.random.seed(0)
 from pytom3d.core import Topography
 from pytom3d.viewer import Viewer, cfg_matplotlib
-from pytom3d.util import save, load, prediction_wrapper, trials, apply_bc
+from pytom3d.util import save, load, prediction_wrapper, trials, predict_at_node
 import pandas as pd
 
 import numpy as np
@@ -25,6 +25,26 @@ x_res = 25
 y_res = 5
 
 # cfg_matplotlib(font_family="serif", use_latex=True)
+
+v = Viewer()
+g = Topography()
+g.make_grid(x_bounds=[-l,l], y_bounds=[h,H], x_res=x_res, y_res=y_res)
+g.add_points(distance3, std_noise=0.01)
+
+# g.cut("x", lo=-50, up=50, out=True)
+# g.rotate(t_deg=[0,0,90])
+
+g.rotate_about_centre(c=[0,0,0], t_deg=[0,0,90])
+
+v.views2D([g])
+
+print(g.history_)
+
+
+
+
+
+
 
 """
 v = Viewer()

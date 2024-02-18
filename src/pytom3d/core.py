@@ -157,7 +157,7 @@ class Topography:
             The translation vector, by default np.array([0, 0, 0]).
         aux : bool, optional
             If True, indicates an auxiliary translation, by default False.
-    
+
         Returns
         -------
         List[Tuple]
@@ -166,21 +166,21 @@ class Topography:
         """
         self.P += v
         return [(len(self.history_), self.translate.__name__), ("vector", v)]
-    
+
     @update
-    def rotate(self, v: np.ndarray = np.array([0.,0.,0.]),
-               t_deg: np.ndarray = np.array([0.,0.,0.]), rot_mat: np.ndarray = None) -> List[Tuple]:
+    def rotate(self, t_deg: np.ndarray = np.array([0.,0.,0.]), rot_mat: np.ndarray = None) -> List[Tuple]:
         """
-        Rotate the data points about a specified center.
-    
+        Rotate the data points about the origin.
+
         Parameters
         ----------
-        v : np.ndarray, optional
-            The center of rotation, by default np.array([0., 0., 0.]).
         t_deg : np.ndarray, optional
             The rotation angles in degrees around x, y, and z axes,
             by default np.array([0., 0., 0.]).
-    
+        rot_mat : np.ndarray, optional
+            Custom rotation matrix. If provided, `t_deg` will be ignored,
+            by default None.
+
         Returns
         -------
         List[Tuple]
@@ -204,11 +204,33 @@ class Topography:
         R = np.matmul(np.matmul(rx, ry), rz)
         if rot_mat is not None:
             R = rot_mat        
-        self.translate(v)
         self.P = np.matmul(self.P, R)
-        self.translate(np.array([-h for h in v]))
-        return [(len(self.history_), self.rotate.__name__),
-                ("centre", v), ("angles", t_deg), ("rot_mat", R)]
+        return [(len(self.history_), self.rotate.__name__), ("angles", t_deg), ("rot_mat", R)]
+
+    def rotate_about_centre(self, c: np.ndarray = np.array([0.,0.,0.]),
+               t_deg: np.ndarray = np.array([0.,0.,0.]), rot_mat: np.ndarray = None) -> List[Tuple]:
+        """
+        Rotate the data points about a specified center. Wraps translate and rotate.
+
+        Parameters
+        ----------
+        c : np.ndarray, optional
+            The center of rotation, by default np.array([0., 0., 0.]).
+        t_deg : np.ndarray, optional
+            The rotation angles in degrees around x, y, and z axes,
+            by default np.array([0., 0., 0.]).
+        rot_mat : np.ndarray, optional
+            Custom rotation matrix. If provided, `t_deg` will be ignored,
+            by default None.
+
+        Returns
+        -------
+        List[Tuple]
+            A list containing information about the rotation event.
+        """
+        self.translate(c)
+        self.rotate(t_deg, rot_mat)
+        self.translate(np.array([-h for h in c]))
     
     @update
     def flip(self, v: np.ndarray = np.array([1.,1.,1.])) -> List[Tuple]:
