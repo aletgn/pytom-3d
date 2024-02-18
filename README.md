@@ -12,7 +12,7 @@ PyToM-3D is a Python package to transform and fit 3-dimensional topographies. It
 
 - [Flip](#flip)
 
-- [Cut-off](#flip)
+- [Cut](#cut)
 
 [Singular Value Decomposition (SVD)](#svd)
 
@@ -22,9 +22,11 @@ PyToM-3D is a Python package to transform and fit 3-dimensional topographies. It
 
 [Data Regression](#data-regression)
 
+- [Gaussian Process Regression](#gpr)
+
 # Initialising a Topography
 
-Initially we need to istantiate a `Topography`:
+Initially, we need to istantiate a `Topography`:
 
 ```python
 t = Topography()
@@ -68,7 +70,7 @@ and updates the point topography stored in ```data```.
 
 ## Flip <a name="flip"></a>
 
-This method allows mirroring data with respect to a given vector $\mathbf{v}=\left[v_x\quad v_y\quad v_z \right]$ which represent the outward normal of the intended flipping plane. Therefore each component must be $-1$ or $1$. Assuming one wishes to flip the data about the $yz$ plane, they would define $\mathbf{v}=\left[-1\quad 1\quad 1 \right]$, and call:
+This method allows mirroring data with respect to a given vector $\mathbf{v}=\left[v_x\quad v_y\quad v_z \right]$ which represent the outward normal of the intended flipping plane. Assuming one wishes to flip the data about the $yz$ plane, they would define $\mathbf{v}=\left[-1\quad 1\quad 1 \right]$, and call:
 
 ```python
 t.flip([-1,1,1])
@@ -78,17 +80,21 @@ This operation performs $(\mathbf{p}_i = \left[x_i\quad y_i \quad z_i\right])$:
 
 $\left[x_i\quad y_i \quad z_i\right] \leftarrow \left[x_i\cdot v_x\quad y_i\cdot vy\quad z_i\cdot vz\right] \quad\forall\ i = 1,2,\dots,N.$
 
-## Cut-off <a name="cut-off"></a>
+## Cut <a name="cut"></a>
 
-Suppose you would like to remove some outliers from your point topography. For the sake of clarity consider the z-axis, the same procedure applies to the other axes identically. Also, assume two threshold values gathered in the following vector [z<sub>min</sub>, z<sub>max</sub>]. This method enables to keep those points whose z-value belongs to [z<sub>min</sub>, z<sub>max</sub>], thus peforming a cutt-off.
+Suppose you would like to remove some outliers from topography. Although the same procedure applies to the other axes identically, we focus on the z-axis. We also assume two threshold $l$ and $u$, whereby we filter each $i$th datum using the criterion:
 
-In order to utilise this method, use:
+$z_i \leftarrow z_i:\quad z_i > l\quad \text{and}\quad z_i < u.$
+
+To do so, we call:
 
 ```python
-cl.cutoff_topography(ax, [ax_min,ax_max])
+t.cut(ax="z", lo=l, up=u, out=False)
 ```
 
-where ```ax``` is the reference axis for the cut-off and ```[ax_min,ax_max]``` is the vector of the threshold values.
+If `out=True` the method keep the points complying with:
+
+$z_i \leftarrow z_i:\quad z_i < l\quad \text{and}\quad z_i > u.$
 
 # Singular Value Decomposition (SVD) <a name="svd"></a>
 
@@ -115,3 +121,39 @@ t.svd()
 Since $\mathbf{V}^\top$ is orthonormal, the topography is subjected to a *rigid* rotation: neither stretching nor deformations occur. If the $\det{V^\top} \simeq -1$, the transformed topography (through SVD) may need flipping. To overcome this, just use ```flip``` ([Flip](#flip)).
 
 # Data Regression <a name="data-regression"></a>
+
+## Gaussian Process Regression (GPR) <a name="gpr"></a>
+
+PyToM-3D wraps the regressors of scikit-learn, amongst which GPR. In this instance, the topography is modelled as the following regression model:
+
+$t(x,y) = f(x,y) + \epsilon(0, \sigma),$
+
+where $f(x,y)$ is a latent function modelling the topography and $\epsilon$ is Gaussian noise having null mean and $\sigma$ as the standard deviation. Next, a Gaussian Process is placed over $f(x,y)$:
+
+$f \sim GP(M(x,y), K(x,y)),$
+
+where $M(x,y)$ is the mean, and $K(x,y)$ is the kernel (covariance function). Initially, we need to define the kernel:
+
+```python
+from sklearn.gaussian_process.kernels import RBF, WhiteKernel, ConstantKernel
+kernel = ConstantKernel() * RBF([1.0, 1.0], (1e-5, 1e5))  WhiteKernel(noise_level=1e-3, noise_level_bounds=(1e-5, 1e5))
+```
+
+which represents a typical squared exponential kernel with noise:
+
+$K(x,y) = C \exp{\left(\frac{\Vert \mathbf{x} - \mathbf{x}'\Vert^2}{l^2}\right)} + \sigma.$
+
+Finally, we invoke:
+
+```python
+from sklearn.gaussian_process import GaussianProcessRegressor as gpr
+t.fit(gpr(kernel=kernel))
+```
+
+and the GPR is fit. To predict data:
+
+```python
+t.pred(X)
+```
+
+where `X` is $M \times 2$ a numpy array containing the $x$ and $y$ coordinates of an evaluation grid.
