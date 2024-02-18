@@ -141,13 +141,13 @@ kernel = ConstantKernel() * RBF([1.0, 1.0], (1e-5, 1e5))  WhiteKernel(noise_leve
 
 which represents a typical squared exponential kernel with noise:
 
-$K(x,y) = C \exp{\left(\frac{\Vert \mathbf{x} - \mathbf{x}'\Vert^2}{l^2}\right)} + \sigma_{ij},$
+$K(\mathbf{x},\mathbf{x}') = C \exp{\left(\frac{\Vert \mathbf{x} - \mathbf{x}'\Vert^2}{l^2}\right)} + \sigma_{ij},$
 
 where:
 
-$\sigma_{ij} = \delta_{ij} \epsilon,$
+$\sigma_{ij} = \delta_{ij} \epsilon,\quad \mathbf{x}=\left[x,y\right]$
 
-and $\delta_{ij}$ is Kronecker's delta.
+and $\delta_{ij}$ is Kronecker's delta applied to any pair of points $\mathbf{x}_{i}$, $\mathbf{x}_j$.
 
 Finally, we invoke:
 
