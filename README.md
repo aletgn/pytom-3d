@@ -81,9 +81,18 @@ t.rotate(t_deg=[t_x, t_y, t_z])
 
 The method supports passing a rotation matrix too:
 
-```
+```python
 t.rotate(rot_mat=R)
 ```
+
+In case on wishes to rotate about a given centre $c=\left[c_x\quad c_y\quad c_z\right]^\top$, they would call the wrapper method:
+
+```pyhton
+t.rotate_about_centre(c=[c_x, c_y, c_z]t_deg=[t_x, t_y, t_z])
+```
+
+or by providing a rotation matrix `rot_mat`.
+
 
 ## Flip <a name="flip"></a>
 
