@@ -4,9 +4,10 @@ from numpy import cos, sin
 from typing import List, Tuple
 from pytom3d.util import update
 
+
 class Topography:
-    
-    def __init__(self, name: str = "unnamed")-> None:
+
+    def __init__(self, name: str = "unnamed") -> None:
         """
         Initialize the Cloud instance.
 
@@ -27,9 +28,13 @@ class Topography:
         self.M = None
         self.G = None
         self.history_ = []
-        
+
+        self.U = None
+        self.S = None
+        self.Vt = None
+
         self.regressor = None
-        
+
     def read(self, file_path: str, reader: callable, **reader_args):
         """
         Read data from file.
@@ -49,16 +54,16 @@ class Topography:
         """
         self.file_path = file_path
         self.P = reader(self.file_path, **reader_args)
-        
+
         try:
             self.P = reader(self.file_path, **reader_args).to_numpy(dtype=np.float64)
         except:
             pass
-        
+
         self.cardinality()
         self.edges()
         self.centroid()
-        
+
     def make_grid(self, x_bounds: List[float], y_bounds: List[float],
              x_res: int = 10, y_res: int = 10) -> None:
         """
@@ -74,11 +79,11 @@ class Topography:
             The resolution of the grid along the x-axis (default is 10).
         y_res : int, optional
             The resolution of the grid along the y-axis (default is 10).
-            
+
         Notes
         -----
         z-value is initialli set to zero.
-        
+
         Returns
         -------
         None
@@ -92,8 +97,8 @@ class Topography:
         self.cardinality()
         self.edges()
         self.centroid()
-        
-    def add_points(self, fxy: callable, std_noise = None):
+
+    def add_points(self, fxy: callable, std_noise=None) -> None:
         """
         Adds a function-generated z-coordinate to the grid points.
 
@@ -108,23 +113,61 @@ class Topography:
         -------
         None
         """
-        self.P[:,2] = fxy(self.P[:,0], self.P[:,1])
+        self.P[:, 2] = fxy(self.P[:, 0], self.P[:, 1])
         if std_noise is not None:
-            self.P[:,2] += np.random.normal(loc=0, scale=std_noise, size=self.P.shape[0])
+            self.P[:, 2] += np.random.normal(loc=0,
+                                             scale=std_noise, size=self.P.shape[0])
         self.cardinality()
         self.edges()
         self.centroid()
-        
+
     def get_topography(self, x, y, z, unc: np.ndarray = None):
+        """
+        Set the topography data for the object.
+
+        This method sets the topography data for the object by updating the
+        'P' attribute with the provided x, y, and z coordinates. It also
+        updates the uncertainty information if provided. Additionally, it
+        calculates and updates the cardinality, edges, and centroid attributes.
+
+        Parameters
+        ----------
+        x : np.ndarray
+            X-coordinates of the data points.
+        y : np.ndarray
+            Y-coordinates of the data points.
+        z : np.ndarray
+            Z-coordinates of the data points.
+        unc : np.ndarray, optional
+            Uncertainty information associated with the data points, by default None.
+
+        Returns
+        -------
+        None
+        """
         self.P = np.vstack([x, y, z]).T
         self.unc = unc
         self.cardinality()
         self.edges()
         self.centroid()
-    
+
     def cardinality(self):
+        """
+        Update the cardinality attribute based on the number of data points.
+
+        This method calculates and updates the 'N' attribute, representing
+        the cardinality (number of data points) of the object.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+        """
         self.N = self.P.shape[0]
-    
+
     def edges(self) -> None:
         """
         Update the minimum and maximum values along each dimension.
@@ -135,7 +178,7 @@ class Topography:
         """
         self.m = self.P.min(axis=0)
         self.M = self.P.max(axis=0)
-        
+
     def centroid(self) -> None:
         """
         Update the centroid of the data.
@@ -145,9 +188,9 @@ class Topography:
         None
         """
         self.G = self.P.sum(axis=0)/self.N
-    
+
     @update
-    def translate(self, v: np.ndarray = np.array([0,0,0]), aux: bool = False) -> List[Tuple]:
+    def translate(self, v: np.ndarray = np.array([0, 0, 0]), aux: bool = False) -> List[Tuple]:
         """
         Translate the data points by the given vector.
 
@@ -168,7 +211,7 @@ class Topography:
         return [(len(self.history_), self.translate.__name__), ("vector", v)]
 
     @update
-    def rotate(self, t_deg: np.ndarray = np.array([0.,0.,0.]), rot_mat: np.ndarray = None) -> List[Tuple]:
+    def rotate(self, t_deg: np.ndarray = np.array([0., 0., 0.]), rot_mat: np.ndarray = None) -> List[Tuple]:
         """
         Rotate the data points about the origin.
 
@@ -188,27 +231,27 @@ class Topography:
 
         """
         t = np.deg2rad(t_deg)
-        
+
         rx = np.array([[1, 0, 0],
                       [0, cos(t[0]), sin(t[0])],
                       [0, -sin(t[0]), cos(t[0])]])
-        
+
         ry = np.array([[cos(t[1]), 0, sin(t[1])],
                       [0, 1, 0],
                       [-sin(t[1]), 0, cos(t[1])]])
-        
+
         rz = np.array([[cos(t[2]), sin(t[2]), 0],
                       [-sin(t[2]), cos(t[2]), 0],
                       [0, 0, 1]])
-        
+
         R = np.matmul(np.matmul(rx, ry), rz)
         if rot_mat is not None:
-            R = rot_mat        
+            R = rot_mat
         self.P = np.matmul(self.P, R)
         return [(len(self.history_), self.rotate.__name__), ("angles", t_deg), ("rot_mat", R)]
 
-    def rotate_about_centre(self, c: np.ndarray = np.array([0.,0.,0.]),
-               t_deg: np.ndarray = np.array([0.,0.,0.]), rot_mat: np.ndarray = None) -> List[Tuple]:
+    def rotate_about_centre(self, c: np.ndarray = np.array([0., 0., 0.]),
+               t_deg: np.ndarray = np.array([0., 0., 0.]), rot_mat: np.ndarray = None) -> List[Tuple]:
         """
         Rotate the data points about a specified center. Wraps translate and rotate.
 
@@ -231,32 +274,32 @@ class Topography:
         self.translate(c)
         self.rotate(t_deg, rot_mat)
         self.translate(np.array([-h for h in c]))
-    
+
     @update
-    def flip(self, v: np.ndarray = np.array([1.,1.,1.])) -> List[Tuple]:
+    def flip(self, v: np.ndarray = np.array([1., 1., 1.])) -> List[Tuple]:
         """
         Flip the data points along each axis.
-    
+
         Parameters
         ----------
         v : np.ndarray, optional
             The scaling factors along each axis, by default np.array([1., 1., 1.]).
-            
+
         Returns
         -------
         List[Tuple]
             A list containing information about the flip event.
-    
+
         """
         self.P *= v
         return [(len(self.history_), self.flip.__name__), ("flip", v)]
-    
+
     @update
     def cut(self, ax: str = None, lo: float = -np.inf, up: float = np.inf,
             tol=1e-8, out=False) -> None:
         """
         Cut data points along a specified axis within a given range.
-    
+
         Parameters
         ----------
         ax : str, optional
@@ -269,26 +312,26 @@ class Topography:
             The tolerance for considering values close to bounds, by default 1e-8.
         out : bool, optional
             If True, keep the points outside the specified range, by default False.
-    
+
         Returns
         -------
         List[Tuple]
             A list containing information about the cut event.
-    
+
         Raises
         ------
         KeyError
             If the specified axis is not valid.
         ValueError
             If the resulting cloud has no points after cutting.
-    
+
         """
         ax2id = {"x": 0, "y": 1, "z": 2}
         try:
             iax = ax2id[ax]
         except KeyError as KE:
             raise KeyError("Axis is not valid") from KE
-        
+
         c1 = np.where((self.P[:, iax] > lo) & (self.P[:, iax] < up))[0]
         # c2 = np.where(np.isclose(self.P[:, iax], lo, atol=tol))[0]
         # c3 = np.where(np.isclose(self.P[:, iax], up, atol=tol))[0]
@@ -296,50 +339,73 @@ class Topography:
         met = c1
         if out:
             met = np.array(list(set(range(0, self.N)) - set(met)))
-        
+
         self.P = self.P[met]
         if self.P.shape[0] == 0:
             raise ValueError("The cloud has no points.")
-        else:        
+        else:
             return [(len(self.history_), self.cut.__name__), ("axis", ax),
                     ("lo", lo),
                     ("up", up),
                     ("exterior", out)]
+
     @update
     def svd(self) -> List[Tuple]:
         """
         Perform Singular Value Decomposition (SVD) on the data points.
-    
+
         Returns
         -------
         List[Tuple]
             A list containing information about the SVD event.
-    
+
         Notes
         -----
         The SVD decomposes the data matrix into three matrices U, S, and V,
-        such that P = U * S * V^T. The rotation is applied to align the
-        principal components with the coordinate axes.
-    
+        such that P = U * S * V^T.
+
         """
-        U,S,V = np.linalg.svd(self.P)
-        self.rotate(-self.G, rot_mat=V)
+        self.U, self.S, self.Vt = np.linalg.svd(self.P)
         return [(len(self.history_), self.svd.__name__),
-                ("U", U),
-                ("V", V),
-                ("S", S),
-                ("det_S", np.linalg.det(V)),]   
-    
-    def history(self):
+                ("U", self.U),
+                ("V", self.Vt),
+                ("S", self.S),
+                ("det_S", np.linalg.det(self.Vt))]
+
+    def rotate_by_svd(self) -> None:
         """
-        Print the event history.
-    
-        Prints each recorded event in the history list, displaying key-value pairs.
-    
+        Rotate the data points using Singular Value Decomposition (SVD).
+ 
+        Wraps translate and rotate via `rotate_about_centre`.
+
+        This method applies rotation to the data points based on the results
+        obtained from Singular Value Decomposition (SVD). It uses the `rotate_about_centre`
+        method to perform the rotation.
+
+        The rotation is achieved by specifying the rotation matrix as `Vt` obtained
+        from the SVD, and the center of rotation (`G`) is set as the negative of the
+        centroid of the data points.
+
+        Parameters
+        ----------
+        None
+
         Returns
         -------
         None
-    
+        """
+        self.rotate_about_centre(-self.G, rot_mat=self.Vt)
+
+    def history(self):
+        """
+        Print the event history.
+
+        Prints each recorded event in the history list, displaying key-value pairs.
+
+        Returns
+        -------
+        None
+
         Notes
         -----
         Each event is separated by a line of dashes for better readability.
@@ -349,11 +415,11 @@ class Topography:
             for k in h.keys():
                 print( k, h[k])
             print("-------------------------------------------------------")
-    
+
     def export(self, path_to_file: str, filename: str, extension: str = ".csv", delimiter: str = ",") -> None:
         """
         Export the grid points to a file in CSV format.
-    
+
         Parameters
         ----------
         path_to_file : str
@@ -364,23 +430,24 @@ class Topography:
             The file extension (default is ".csv").
         delimiter : str, optional
             The delimiter used in the CSV file (default is ",").
-    
+
         Returns
         -------
         None
+
         """
         np.savetxt(path_to_file + filename + extension, self.P, delimiter=delimiter)
 
     def fit(self, regressor, **args):
         self.regressor = regressor
         self.regressor.fit(self.P[:,0:2], self.P[:,2])
-        
+
     def pred(self, X):
         return self.regressor.predict(X, return_std=True)
-    
+
     def __len__(self):
         return self.P.shape[0]
-    
+
     def __repr__(self):
         s_name = f"NAME: {self.name}\n"
         s_len = f"LEN: {self.N}\n"
@@ -389,18 +456,19 @@ class Topography:
         s_g = f"G: {self.G}\n"
         s_ = f"{self.P}\n"
         return s_name+s_len+s_min+s_max+s_g+s_
-    
+
     def __add__(self, topography):
         """
         Concatenate the points of the current grid with the points of another topography.
-    
+
         Parameters
         ----------
         topography : Grid
             Another instance of the Grid class whose points will be concatenated with the current grid.
-    
+
         Returns
         -------
         None
+
         """
         self.P = np.concatenate([self.P, topography.P])

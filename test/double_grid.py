@@ -34,10 +34,11 @@ g.add_points(distance3, std_noise=0.01)
 # g.cut("x", lo=-50, up=50, out=True)
 # g.rotate(t_deg=[0,0,90])
 
-g.rotate_about_centre(c=[0,0,0], t_deg=[0,0,90])
+# g.rotate_about_centre(c=[0,0,0], t_deg=[0,0,90])
 
+g.svd()
+g.rotate_by_svd()
 v.views2D([g])
-
 print(g.history_)
 
 

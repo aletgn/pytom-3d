@@ -6,11 +6,12 @@ import matplotlib
 from matplotlib import ticker
 import numpy as np
 
+
 class Viewer:
     
     def __init__(self, name: str = "unnamed") -> None:
         self.name = name
-    
+
     def views2D(self, data: List[Topography]) -> None:
         """
         Generate 2D scatter plots for the XY, XZ, and YZ planes of multiple Topography objects.
@@ -26,30 +27,30 @@ class Viewer:
 
         """
         plt.figure(dpi=300)
-        for d in data: 
+        for d in data:
             # XY plane
             plt.subplot(221)
-            plt.scatter(d.P[:,0], d.P[:,1], s=3, alpha=1)
+            plt.scatter(d.P[:, 0], d.P[:, 1], s=3, alpha=1)
             plt.title('xy plane')
             plt.xlabel('x')
             plt.ylabel('y')
-             
+
             # XZ plane
             plt.subplot(222)
-            plt.scatter(d.P[:,0], d.P[:,2], s=3, alpha=1)
+            plt.scatter(d.P[:, 0], d.P[:, 2], s=3, alpha=1)
             plt.title('xz plane')
             plt.xlabel('x')
             plt.ylabel('z')
-             
+
             # YZ plane
             plt.subplot(223)
-            plt.scatter(d.P[:,1], d.P[:,2], s=3, alpha=1)
+            plt.scatter(d.P[:, 1], d.P[:, 2], s=3, alpha=1)
             plt.title('yz plane')
             plt.xlabel('y')
             plt.ylabel('z')
         plt.gcf().tight_layout(pad=1)
         plt.show()
-    
+
     def scatter3D(self, data: List[Topography], x_lim: List[float] = None,
                   y_lim: List[float] = None, z_lim: List[float] = None, colour = False) -> None:
         """
@@ -116,14 +117,14 @@ class Viewer:
                                                    vmax, 11)),
                             label='Altitude')
         cbar.ax.tick_params(direction='in', right=1, left=1, size=2.5)
-        
+
         ax.axis('tight')
         plt.show()
 
     def scatter3DRegression(self, regression: Topography, reference: Topography = None) -> None:
         fig = plt.figure(dpi=300)
         ax = fig.add_subplot(1, 1, 1, projection='3d')
-        
+
         ax.set_xlabel("x [mm]")
         ax.set_ylabel("y [mm]")
         ax.set_zlabel("z [mm]")
@@ -155,12 +156,13 @@ class Viewer:
                             ticks=list(np.linspace(vmin, vmax, 11)),
                             label='Uncertainty')
         cbar.ax.tick_params(direction='in', right=1, left=1, size=2.5)
-        
+
         if reference is not None:
             ax.scatter3D(reference.P[:, 0], reference.P[:, 1], reference.P[:, 2], s=2, alpha=1)
 
         ax.axis('tight')
         plt.show()
+
 
 def cfg_matplotlib(font_size: int = 12, font_family: str = 'sans-serif', use_latex: bool = False) -> None:
     """
@@ -185,4 +187,3 @@ def cfg_matplotlib(font_size: int = 12, font_family: str = 'sans-serif', use_lat
     matplotlib.rcParams['font.size'] = font_size
     matplotlib.rcParams['font.family'] = font_family
     matplotlib.rcParams['text.usetex'] = use_latex
-    
