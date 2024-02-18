@@ -8,7 +8,7 @@ PyToM-3D is a Python package to transform and fit 3-dimensional topographies. It
 
 - [Translation](#translation)
 
-- [Rigid Rotation](#rigid-rotation)
+- [Rotation](#rotation)
 
 - [Flip](#flip)
 
@@ -40,7 +40,11 @@ We have a multitude of options:
 
 # Geometric Transformations <a name="geometric-transformations"></a>
 
-In order to understand each geometric transformation remember that the points of the topography are stored in the attribute ```P```, which is a $N\times 3$ matrix, say $\mathbf{P}=\left[\mathbf{p}_1\quad \mathbf{p}_2\quad\mathbf{p}_N\right]^\top$, where $\mathbf{p}_i = \left[x_i\quad y_i \quad z_i\right]$ is the *i*th point of the topography. In, practice the altitude $z_i$ is determined upon a latent function of the coordinates, hence $z_i = f(x_i, y_i)$.
+In order to understand each geometric transformation remember that the points of the topography are stored in the attribute ```P```, which is a $N\times 3$ matrix:
+
+$$\mathbf{P} = \begin{bmatrix}  x_1 & y_1 & z_1 \\\ x_2 & y_2 & z_2 \\\ \vdots & \vdots & \vdots \\\ x_N & y_N & z_N\end{bmatrix},$$
+
+where $\mathbf{p}_i = \left[x_i\quad y_i \quad z_i\right]$ is the *i*th point of the topography. In practice the altitude $z_i$ is determined upon a latent function of the coordinates, hence $z_i = f(x_i, y_i)$.
 
 ## Translation <a name="translation"></a>
 
@@ -54,18 +58,14 @@ we translate $\mathbf{P}$ by $\mathbf{v}$ as:
 
 $\mathbf{p}_i \leftarrow \mathbf{p}_i + \mathbf{v}\quad\forall\ i = 1,2,\dots,N.$
 
-### Rigid Rotation <a name="rigid-rotation"></a>
+## Rotation <a name="rotation"></a>
 
-$\begin{bmatrix} 1 & 2 & 3 \\\ 1 & 2 & 4 \end{bmatrix}$
-
-
-
-
+$$\begin{bmatrix}  a & b & c \\\ d & e & f \\\ g & h & i \\\ \end{bmatrix}$$
 
 Let **v** = [x<sub>p</sub>,y<sub>p</sub>,z<sub>p</sub>], *a* and *ax* be a pole, and angle (in degrees) and the axis identifier (0=x, 1=y, 2=z), respectively. Furthermore, according to the chosen axis, assume the correspondent rotation matrix **R**(*a*). The method:
 
 ```python
-cl.rotate_topography(p, ax, a)
+t.rotate(...)
 ```
 
 performs a rigid rotation of the point topography about the *ax* axis, with respect to the pole **p**,  by rotating **M**<sub>i</sub> in agreement with **R**(*a*):
