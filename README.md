@@ -22,6 +22,14 @@ PyToM-3D is a Python package to transform and fit 3-dimensional topographies. It
 
 - [Gaussian Process Regression](#gpr)
 
+- [Spline Fitting](#spline)
+
+[Data Inspection](#data-inspection)
+
+- [2D Views](#2d)
+
+- [3D Views](#3d)
+
 # Initialising a Topography
 
 Initially, we need to istantiate a `Topography`:
@@ -159,7 +167,7 @@ Since $\mathbf{V}^\top$ is orthonormal, the topography is subjected to a *rigid*
 
 PyToM-3D wraps the regressors of scikit-learn, amongst which GPR. In this instance, the topography is modelled as the following regression model:
 
-$t(x,y) = f(x,y) + \epsilon(0, \sigma),$
+$$t(x,y) = f(x,y) + \epsilon(0, \sigma),$$
 
 where $f(x,y)$ is a latent function modelling the topography and $\epsilon$ is Gaussian noise having null mean and $\sigma$ as the standard deviation. Next, a Gaussian Process is placed over $f(x,y)$:
 
@@ -169,7 +177,8 @@ where $M(x,y)$ is the mean, and $K(x,y)$ is the kernel (covariance function). In
 
 ```python
 from sklearn.gaussian_process.kernels import RBF, WhiteKernel, ConstantKernel
-kernel = ConstantKernel() * RBF([1.0, 1.0], (1e-5, 1e5))  WhiteKernel(noise_level=1e-3, noise_level_bounds=(1e-5, 1e5))
+kernel = ConstantKernel() * RBF([1.0, 1.0], (1e-5, 1e5)) \
+                + WhiteKernel(noise_level=1e-3, noise_level_bounds=(1e-5, 1e5))
 ```
 
 which represents a typical squared exponential kernel with noise:
@@ -196,3 +205,52 @@ t.pred(X)
 ```
 
 where `X` is $M \times 2$ a numpy array containing the $x$ and $y$ coordinates of an evaluation grid.
+
+## Spline Fitting <a name="spline"></a>
+
+PyToM-3D allows user to fit data by bi-variate splines specifically wrapping `scipy.interpolate.bisplrep`. Modelling the topography as a two-variable function $f(x,y)$, we approximate it as:
+
+$$f(x,y) \approx \sum_{i=1}^{m} \sum_{j=1}^{n} C_{ij} Q_{i,r}(x) Q_{j,s}(y), $$
+
+where $Q_{i,r}$ and $Q_{j,s}$ are polynomials of degree $r$ and $s$ respectively. Additionally, $m$ and $n$ are the number of control points (aka knots) distributed along the $x$- and $y$-axis. Lastly, $C_{ij}$ are the trainable coefficients, which are determined upon the points of the topography.
+
+To fit a bi-variate spline to the data, we call:
+
+```python
+from scipy.interpolate import bisplrep
+t.fit(bisplrep, kx, ky, tx, ty)
+```
+
+where `kx`, `ky` represent the above-mentioned $r$ and $s$ (degree of the polynomials), and `tx` and `ty` are the control points, which are expected to be `np.ndarray`-like objects. Once the fitting is done we forecast the topography elsewhere by:
+
+```python
+t.pred(X)
+```
+
+# Data Inspection <a name="data-inspection"></a>
+PyToM-3D offers afew visualisation utilities to inspect the data. Particularly, it exploits `pytom3d.Viewer.Viewer` class. So we need one istance of this class before proceeding:
+
+```python
+from pytom3d.Viewer import Viewer
+v = Viewer()
+```
+
+## 2D Views <a name="2d"></a>
+
+We can easily display the three Cartesian  views of the topography `t`, by using:
+
+```python
+v.views2D([t])
+```
+
+The method can take an indefinite numember of input topographies thanks to the list _(edit using *args)_.
+
+## 3D Scatter <a name="3d"></a>
+
+Similarly we can easily the 3D scatter plot of `t` with:
+
+```python
+v.scatter(t)
+```
+
+The method can take an indefinite numember of input topographies thanks to the list _(edit using *args)_.
