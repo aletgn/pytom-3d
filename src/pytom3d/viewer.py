@@ -10,9 +10,58 @@ import numpy as np
 class Viewer:
     
     def __init__(self, name: str = "unnamed") -> None:
-        self.name = name
+        """
+        Initialize a new instance of YourClass.
+    
+        Parameters
+        ----------
+        name : str, optional
+            The name to be assigned to the instance. Default is "unnamed".
+    
+        Attributes
+        ----------
+        name : str
+            The name of the instance.
+        x_lim : List[float] or None
+            The limits for the x-axis.
+        y_lim : List[float] or None
+            The limits for the y-axis.
+        z_lim : List[float] or None
+            The limits for the z-axis.
+            
+        Returns
+        -------
+            None
 
-    def views2D(self, data: List[Topography]) -> None:
+        """
+        self.name = name
+        self.x_lim = None
+        self.y_lim = None
+        self.z_lim = None
+        
+    def set_limits(self, x: List[float] = None, y: List[float] = None, z: List[float] = None) -> None:
+        """
+        Set the limits for the x, y, and z axes.
+    
+        Parameters
+        ----------
+        x : List[float], optional
+            The limits for the x-axis.
+        y : List[float], optional
+            The limits for the y-axis.
+        z : List[float], optional
+            The limits for the z-axis.
+    
+        Returns
+        -------
+        None
+
+        """
+        self.x_lim = x
+        self.y_lim = y
+        self.z_lim = z
+
+    def views2D(self, *data: List[Topography]) -> None:
         """
         Generate 2D scatter plots for the XY, XZ, and YZ planes of multiple Topography objects.
 
@@ -51,8 +100,7 @@ class Viewer:
         plt.gcf().tight_layout(pad=1)
         plt.show()
 
-    def scatter3D(self, data: List[Topography], x_lim: List[float] = None,
-                  y_lim: List[float] = None, z_lim: List[float] = None, colour = False) -> None:
+    def scatter3D(self, *data: List[Topography]) -> None:
         """
         Generate a 3D scatter plot for the given Topography data.
 
@@ -66,8 +114,6 @@ class Viewer:
             Limits for the y-axis. Default is None.
         z_lim : List[float], optional
             Limits for the z-axis. Default is None.
-        colour : bool, optional
-            If True, use color mapping based on z-coordinate. Default is False.
 
         Returns
         -------
@@ -77,14 +123,14 @@ class Viewer:
         fig = plt.figure(dpi=300)
         ax = fig.add_subplot(1, 1, 1, projection='3d')
 
-        if x_lim is not None:
-            ax.set_xlim(x_lim)
-        if y_lim is not None:
-            ax.set_ylim(y_lim)
-        if z_lim is not None:
-            ax.set_zlim(z_lim)
-            vmin = z_lim[0]
-            vmax = z_lim[1]
+        if self.x_lim is not None:
+            ax.set_xlim(self.x_lim)
+        if self.y_lim is not None:
+            ax.set_ylim(self.y_lim)
+        if self.z_lim is not None:
+            ax.set_zlim(self.z_lim)
+            vmin = self.z_lim[0]
+            vmax = self.z_lim[1]
         else:
             vmin = np.array([h.m[2] for h in data]).min()
             vmax = np.array([h.M[2] for h in data]).max()

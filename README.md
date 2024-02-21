@@ -240,10 +240,10 @@ v = Viewer()
 We can easily display the three Cartesian  views of the topography `t`, by using:
 
 ```python
-v.views2D([t])
+v.views2D(t)
 ```
 
-The method can take an indefinite numember of input topographies thanks to the list _(edit using *args)_.
+The method can take an indefinite number of input topographies.
 
 ## 3D Scatter <a name="3d"></a>
 
@@ -253,4 +253,4 @@ Similarly we can easily the 3D scatter plot of `t` with:
 v.scatter(t)
 ```
 
-The method can take an indefinite numember of input topographies thanks to the list _(edit using *args)_.
+The method accepts an indefinite number of input topographies.
