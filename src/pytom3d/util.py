@@ -1,7 +1,7 @@
 import functools
 import pickle
 import numpy as np
-from typing import Tuple
+from typing import Tuple, List, Any
 
 
 def summation(x, y):
@@ -14,6 +14,88 @@ def distance(x, y):
 
 def distance2(x, y):
     return (abs(2*x)+y**2)**0.5
+
+
+def export_regressor(regressor, folder: str = "./", filename: str = "my_regressor", extension: str = ".rg",
+                     excluded_keys: List[str] = [], forced_values: List[Any] = []) -> None:
+    """
+    Export the attributes of a regressor to a dictionary for storage or inspection.
+
+    Parameters
+    ----------
+    regressor : object
+        The regressor object to export.
+
+    path_to_file : str, optional
+        The path to the file for exporting the regressor attributes. Default is "./".
+
+    excluded_keys : list of str, optional
+        A list of attribute keys to be excluded from the exported dictionary.
+
+    forced_values : list of any, optional
+        A list of values to be used for attributes specified in `excluded_keys`.
+
+    Returns
+    -------
+        The dictionary containing the attributes of the regressor.
+
+    Raises
+    ------
+    AssertionError
+        If the length of `excluded_keys` is not equal to the length of `forced_values`.
+
+    Notes
+    -----
+        This function is provided for convenience to handle backward compatibility
+        of scikit-learn.
+
+    """
+    regressor_dict = {}
+
+    assert len(excluded_keys) == len(forced_values)
+
+    for k in vars(regressor).keys():
+        if k in excluded_keys:
+            regressor_dict[k] = forced_values[excluded_keys.index(k)]
+        else:
+            regressor_dict[k] = vars(regressor)[k]
+
+    save(regressor_dict, folder, filename, extension)
+    return regressor_dict
+
+
+def import_regressor(folder: str = "./", filename: str = "my_regressor.rg", init_regressor = None) -> dict:
+    """
+    Import a regressor's attributes from a saved file and update an initialized regressor object.
+
+    Parameters
+    ----------
+    folder : str, optional
+        The path to the folder containing the saved regressor attributes file. Default is "./".
+
+    filename : str, optional
+        The name of the file containing the saved regressor attributes. Default is "my_regressor.rg".
+
+    init_regressor : object
+        The initialized regressor object to be updated with the imported attributes.
+
+    Returns
+    -------
+    dict
+        A dictionary containing the imported regressor attributes.
+
+    Notes
+    -----
+        This function is provided for convenience to handle backward compatibility
+        of scikit-learn.
+
+    """
+    regressor_dict = load(folder, filename)
+
+    for k in regressor_dict.keys():
+        setattr(init_regressor, k, regressor_dict[k])
+
+    return regressor_dict
 
 
 def trials(regressor, mesh, n: int = 1, folder: str = "./") -> None:
@@ -66,6 +148,7 @@ def predict_at_node(xx, yy, regressor):
     ------
     Exception
         If there is not exactly one node matching the specified coordinates.
+
     """
     node_id = np.where(np.isclose(regressor[:, 0], xx, atol=1e-8) & np.isclose(regressor[:, 1], yy, atol=1e-8))[0]
     xm = regressor[node_id][0]
@@ -129,16 +212,16 @@ def save(obj, folder: str = "./", filename: str = "my_file", extension: str = ".
         pickle.dump(obj, file)
 
 
-def load(filename, folder: str = "./"):
+def load(folder: str = "./", filename: str = "my_file.bin"):
     """
      Load an object from a binary file using pickle.
 
     Parameters
     ----------
-    - filename: str
-    The name of the file to be loaded.
     - folder: str, optional
-    The directory path where the file is located. Default is "./".
+        The directory path where the file is located. Default is "./".
+    - filename: str
+        The name of the file to be loaded.
 
     Returns
     -------
