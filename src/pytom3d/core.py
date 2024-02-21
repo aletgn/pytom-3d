@@ -1,9 +1,9 @@
 import numpy as np
 # import pandas as pd
 from numpy import cos, sin
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 from pytom3d.util import update
-
+from scipy.interpolate import bisplrep, bisplev
 
 class Topography:
 
@@ -438,12 +438,71 @@ class Topography:
         """
         np.savetxt(path_to_file + filename + extension, self.P, delimiter=delimiter)
 
-    def fit(self, regressor, **args):
-        self.regressor = regressor
-        self.regressor.fit(self.P[:,0:2], self.P[:,2])
+    def fit(self, regressor, **args: Dict) -> None:
+        """
+        Fit a regressor to the data.
 
-    def pred(self, X):
-        return self.regressor.predict(X, return_std=True)
+        Parameters
+        ----------
+        regressor : sklearn regressor class or callable
+            The regressor to be used for fitting. If a sklearn regressor class is provided,
+            it is instantiated and fitted to the data. If a callable (e.g., a spline function)
+            is provided, it is used directly for fitting.
+
+        **args : additional keyword arguments
+            Additional arguments to be passed to the regressor constructor if using a sklearn regressor class.
+
+        Notes
+        -----
+        This method first tries to fit the provided regressor to the data using the sklearn API.
+        If an AttributeError occurs (indicating that the regressor doesn't have a 'fit' method),
+        it assumes that a callable (e.g., a spline function) is provided and uses it directly for fitting.
+
+        Returns
+        -------
+            None
+
+        Examples
+        --------
+        # Example 1: Fit a linear regression model
+        model.fit(LinearRegression())
+
+        # Example 2: Fit a custom spline function
+        model.fit(scipy.bisplrep, **args)
+
+        """
+        try:
+            self.regressor = regressor
+            self.regressor.fit(self.P[:,0:2], self.P[:,2])
+        except AttributeError:
+            print("Using SPLINES.")
+            self.regressor = regressor(self.P[:, 0], self.P[:, 1], self.P[:, 2], **args)
+
+    def pred(self, X: np.ndarray) -> np.ndarray:
+        """
+        Predict target values for input data.
+
+        Parameters
+        ----------
+        X : np.ndarray
+            Input data for prediction.
+
+        Returns
+        -------
+        np.ndarray
+            If using a sklearn regressor, returns a tuple containing the predicted values and their standard deviations.
+            If using a callable (e.g., a spline function), returns an array of predicted values.
+
+        Notes
+        -----
+        If an exception occurs during prediction, it assumes that a callable regressor is provided,
+        and uses it directly for prediction.
+
+        """
+        try:
+            return self.regressor.predict(X, return_std=True)
+        except:
+            return np.array([bisplev(k[0], k[1], self.regressor) for k in X])
 
     def __len__(self):
         return self.P.shape[0]
