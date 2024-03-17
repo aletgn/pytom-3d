@@ -79,21 +79,21 @@ class Viewer:
         for d in data:
             # XY plane
             plt.subplot(221)
-            plt.scatter(d.P[:, 0], d.P[:, 1], s=3, alpha=1)
+            plt.scatter(d.P[:, 0], d.P[:, 1], s=1, alpha=1)
             plt.title('xy plane')
             plt.xlabel('x')
             plt.ylabel('y')
 
             # XZ plane
             plt.subplot(222)
-            plt.scatter(d.P[:, 0], d.P[:, 2], s=3, alpha=1)
+            plt.scatter(d.P[:, 0], d.P[:, 2], s=1, alpha=1)
             plt.title('xz plane')
             plt.xlabel('x')
             plt.ylabel('z')
 
             # YZ plane
             plt.subplot(223)
-            plt.scatter(d.P[:, 1], d.P[:, 2], s=3, alpha=1)
+            plt.scatter(d.P[:, 1], d.P[:, 2], s=1, alpha=1)
             plt.title('yz plane')
             plt.xlabel('y')
             plt.ylabel('z')
@@ -154,7 +154,7 @@ class Viewer:
         ax.grid(True)
 
         for d in data:
-            sc = ax.scatter3D(d.P[:, 0], d.P[:, 1], d.P[:, 2], s=2, alpha=1,
+            sc = ax.scatter3D(d.P[:, 0], d.P[:, 1], d.P[:, 2], s=0.5, alpha=1,
                               vmin=vmin, vmax=vmax, c=d.P[:, 2])
 
         cbar = fig.colorbar(sc, ax=ax, orientation="vertical",

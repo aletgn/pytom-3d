@@ -27,6 +27,7 @@ class Topography:
         self.m = None
         self.M = None
         self.G = None
+        self.a = None
         self.history_ = []
 
         self.U = None
@@ -188,6 +189,25 @@ class Topography:
         None
         """
         self.G = self.P.sum(axis=0)/self.N
+
+    @update
+    def filter_points(self, indices: np.ndarray) -> List[Tuple]:
+        """
+        Filter points by index.
+
+        Parameters
+        ----------
+        indices : np.ndarray
+            The vector of indices of the points that are kept in the cloud.
+
+        Returns
+        -------
+        List[Tuple]
+            A list containing information about the filtering event.
+
+        """
+        self.P = self.P[indices, :]
+        return [(len(self.history_), self.filter_points.__name__), ("indices", indices)]
 
     @update
     def translate(self, v: np.ndarray = np.array([0, 0, 0]), aux: bool = False) -> List[Tuple]:
