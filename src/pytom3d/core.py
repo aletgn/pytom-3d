@@ -26,6 +26,7 @@ class Topography:
         self.N = None
         self.m = None
         self.M = None
+        self.D = None
         self.G = None
         self.a = None
         self.history_ = []
@@ -179,6 +180,7 @@ class Topography:
         """
         self.m = self.P.min(axis=0)
         self.M = self.P.max(axis=0)
+        self.D = np.abs(self.M - self.m)
 
     def centroid(self) -> None:
         """
@@ -532,9 +534,10 @@ class Topography:
         s_len = f"LEN: {self.N}\n"
         s_min = f"MIN: {self.m}\n"
         s_max = f"MAX: {self.M}\n"
+        s_dim = f"DIM: {self.D}\n"
         s_g = f"G: {self.G}\n"
         s_ = f"{self.P}\n"
-        return s_name+s_len+s_min+s_max+s_g+s_
+        return s_name+s_len+s_min+s_max+s_dim+s_g+s_
 
     def __add__(self, topography):
         """
