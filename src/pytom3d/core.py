@@ -363,6 +363,7 @@ class Topography:
             met = np.array(list(set(range(0, self.N)) - set(met)))
 
         self.P = self.P[met]
+        self.N = self.P.shape[0]
         if self.P.shape[0] == 0:
             raise ValueError("The cloud has no points.")
         else:
