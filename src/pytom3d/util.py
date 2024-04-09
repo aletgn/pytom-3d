@@ -1,4 +1,5 @@
 import functools
+import glob
 import pickle
 import numpy as np
 from typing import Tuple, List, Any
@@ -212,16 +213,14 @@ def save(obj, folder: str = "./", filename: str = "my_file", extension: str = ".
         pickle.dump(obj, file)
 
 
-def load(folder: str = "./", filename: str = "my_file.bin"):
+def load(path: str = "./"):
     """
      Load an object from a binary file using pickle.
 
     Parameters
     ----------
-    - folder: str, optional
-        The directory path where the file is located. Default is "./".
-    - filename: str
-        The name of the file to be loaded.
+    - path: str, optional
+        The path of the file. Default is "./".
 
     Returns
     -------
@@ -229,8 +228,29 @@ def load(folder: str = "./", filename: str = "my_file.bin"):
         The loaded object.
 
     """
-    with open(folder + filename, 'rb') as file:
+    with open(path, 'rb') as file:
         return pickle.load(file)
+
+
+def list_files(folder: str = "./", extension: str = ".gpr") -> List[str]:
+    """List files in a folder."""
+    folder_path = folder
+    files = glob.glob(folder_path + '/*' + extension)
+    return [file for file in files]
+
+
+def lite_dict(gpr_obj: Any):
+    """Load lite version of the regressor. Testing..."""
+    gpr_ = load(gpr_obj)
+    keys = ["k1__k1__constant_value", "k1__k1__constant_value_bounds",
+            "k1__k2__length_scale", "k1__k2__length_scale_bounds",
+            "k2__noise_level", "k2__noise_level_bounds"]
+    values = [gpr_.kernel_.get_params()[k] for k in keys]
+    params_dict = dict(zip(keys, values))
+    data_dict = {"X_train_": gpr_.X_train_,
+                 "y_train_": gpr_.y_train_}
+    params_dict.update(data_dict)
+    return params_dict
 
 
 def update(method: callable):
