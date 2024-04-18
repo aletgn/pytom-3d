@@ -2,3 +2,5 @@ __pycache__
 *.bin
 *.egg-info
 /test/*.txt
+build/
+docs/_build/
