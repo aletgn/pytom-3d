@@ -210,7 +210,17 @@ class Viewer:
         plt.show()
 
 
-def cfg_matplotlib(font_size: int = 12, font_family: str = 'sans-serif', use_latex: bool = False) -> None:
+def ScanViewer(*scan):
+    fig, ax = plt.subplots(dpi=300)
+    for s in scan:
+        try:
+            ax.errorbar(s.x, s.y, s.y_err, fmt="-o", markersize=3, capsize=3, capthick=1, linewidth=0.8)
+        except KeyError:
+            ax.plot(s.x, s.y)
+    plt.show()
+
+
+def cfg_matplotlib(font_size: int = 12, font_family: str = 'sans-serif', use_latex: bool = False, interactive: bool = False) -> None:
     """
     Set Matplotlib RC parameters for font size, font family, and LaTeX usage.
 
