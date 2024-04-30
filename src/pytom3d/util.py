@@ -348,6 +348,27 @@ def gather_data(match: str, inp: List[int], out: int, path: str, *list_path: Lis
     df.to_excel(path, index=False)
 
 
+def get_coordinates(inp: List[int], *list_path: List[str]) -> np.ndarray:
+    """
+    Load and return the specified columns as coordinates from the first file path provided.
+
+    Parameters
+    ----------
+    inp : List[int]
+        List of column indices to extract as coordinates.
+
+    list_path : List[str]
+        Variable number of file paths containing the data. Only the first file path is used.
+
+    Returns
+    -------
+    np.ndarray
+        An array containing the coordinates extracted from the specified columns of the first file.
+
+    """
+    return np.load(list_path[0])[:, inp]
+
+
 def lite_dict(gpr_obj: Any):
     """
     Load lite version of the regressor.
