@@ -1,3 +1,4 @@
+import os
 import functools
 import glob
 import pickle
@@ -252,6 +253,52 @@ def list_files(folder: str = "./", extension: str = ".gpr") -> List[str]:
     folder_path = folder
     files = glob.glob(folder_path + '/*' + extension)
     return [file for file in files]
+
+
+def recursive_search(path: str, extension: str = ".dat", match: str = None,
+                     pop_first: bool = False, take_first: bool = False) -> List[str]:
+    """
+    Recursively search for files with a specified extension in a directory and its subdirectories,
+    optionally filtering by a match string and returning a modified list based on flags.
+
+    Parameters
+    ----------
+    path : str
+        The path to the directory to search in.
+
+    extension : str, optional
+        The file extension to search for. Default is ".dat".
+
+    match : str, optional
+        A substring to match in the file names. Default is None.
+
+    pop_first : bool, optional
+        If True, remove and discard the first element of the resulting list. Default is False.
+
+    take_first : bool, optional
+        If True, return only the first matching file. Overrides pop_first. Default is False.
+
+    Returns
+    -------
+    List[str]
+        A list of file paths matching the specified criteria.
+
+    """
+    file_list = []
+    for root, dirs, files in os.walk(path):
+        for file in files:
+            file_path = os.path.join(root, file)
+            if file_path.endswith(extension):
+                if match is not None:
+                    if match in file_path:
+                        file_list.append(file_path)
+
+    if pop_first == True:
+        return sorted(file_list)[1:None]
+    elif take_first == True:
+        return sorted(file_list)[0]
+    else:
+        return sorted(file_list[0:None])
 
 
 def lite_dict(gpr_obj: Any):
