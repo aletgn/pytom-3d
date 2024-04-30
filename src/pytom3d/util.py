@@ -3,6 +3,8 @@ import functools
 import glob
 import pickle
 import numpy as np
+import pandas as pd
+import re
 from typing import Tuple, List, Any
 
 
@@ -299,6 +301,51 @@ def recursive_search(path: str, extension: str = ".dat", match: str = None,
         return sorted(file_list)[0]
     else:
         return sorted(file_list[0:None])
+
+
+def gather_data(match: str, inp: List[int], out: int, path: str, *list_path: List[str]) -> None:
+    """
+    Load data from multiple files, extract specified columns, and save to an Excel file.
+
+    Parameters
+    ----------
+    match : str
+        A regular expression pattern to match against the file paths.
+
+    inp : List[int]
+        List of column indices to extract as input features.
+
+    out : int
+        Index of the column to extract as the output feature.
+
+    path : str
+        Path to the output Excel file.
+
+    *list_path : List[str]
+        Variable number of file paths containing the data.
+
+    Returns
+    -------
+    None
+
+    """
+    n2c = {"0": "x", "1": "y"}
+    df = pd.DataFrame()
+
+    for p in list_path:
+        list_idx = list_path.index(p)
+        regex_idx = re.search(match, p).group(0)
+        input_cols = np.load(p)[:, inp]
+        output_col = np.load(p)[:, out]
+
+        if list_idx == 0:
+            for r in range(0,len(inp)):
+                df.insert(r, n2c[str(r)], input_cols[:,r])
+            df.insert(len(df.columns), regex_idx, output_col)
+        else:
+            df.insert(len(df.columns), regex_idx, output_col)
+
+    df.to_excel(path, index=False)
 
 
 def lite_dict(gpr_obj: Any):
