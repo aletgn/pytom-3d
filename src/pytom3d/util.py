@@ -233,14 +233,47 @@ def load(path: str = "./"):
 
 
 def list_files(folder: str = "./", extension: str = ".gpr") -> List[str]:
-    """List files in a folder."""
+    """
+    List files in a folder.
+
+    Parameters
+    ----------
+    folder : str, optional
+        Path to the folder to search for files. Default is "./".
+    extension : str, optional
+        File extension to filter files. Default is ".gpr".
+
+    Returns
+    -------
+    List[str]
+        A list of file paths with the specified extension in the folder.
+
+    """
     folder_path = folder
     files = glob.glob(folder_path + '/*' + extension)
     return [file for file in files]
 
 
 def lite_dict(gpr_obj: Any):
-    """Load lite version of the regressor. Testing..."""
+    """
+    Load lite version of the regressor.
+
+    Parameters
+    ----------
+    gpr_obj : Any
+        Object of the Gaussian Process Regressor.
+
+    Returns
+    -------
+    Dict[str, Any]
+        Dictionary containing selected parameters and training data.
+
+    Notes
+    -----
+    This function loads a lite version of the Gaussian Process Regressor
+    by extracting specific parameters and training data for testing purposes.
+
+    """
     gpr_ = load(gpr_obj)
     keys = ["k1__k1__constant_value", "k1__k1__constant_value_bounds",
             "k1__k2__length_scale", "k1__k2__length_scale_bounds",
