@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Set the path to your .whl file
-WHL_FILE=./dist/pytom3d-0.0.0-py3-none-any.whl
+WHL_FILE=./dist/pytom3d-0.0.2-py3-none-any.whl
 
 # Set the desired path for the virtual environment
 VENV_DIR=$HOME/pythonEnv/simulation

@@ -1,5 +1,5 @@
-pytom3d package
-===============
+pytom3d
+=======
 
 Submodules
 ----------
