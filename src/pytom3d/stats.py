@@ -2,7 +2,7 @@ from typing import List
 import numpy as np
 
 
-def running_mean(inp: List[int], out: int, up_to_id = None, *list_path: List[str]) -> np.ndarray:
+def running_mean(out: int, up_to_id = None, *list_path: List[str]) -> np.ndarray:
     """
     Calculate the running mean of specified columns across multiple files.
 
@@ -40,7 +40,7 @@ def running_mean(inp: List[int], out: int, up_to_id = None, *list_path: List[str
     return cumulative_sum/N
 
 
-def running_std(inp: List[int], out: int, up_to_id = None, ddof: int = 1, *list_path: List[str]) -> np.ndarray:
+def running_std(out: int, up_to_id = None, ddof: int = 1, *list_path: List[str]) -> np.ndarray:
     """
     Calculate the running standard deviation of specified columns across multiple files.
 
@@ -56,7 +56,7 @@ def running_std(inp: List[int], out: int, up_to_id = None, ddof: int = 1, *list_
         Index of the last file to include in the calculation. If None, all files are included. Default is None.
 
     ddof : int, optional
-        Delta degrees of freedom. Default is 1.
+        Degrees of freedom. Default is 1 (unbiased variance estimator).
 
     list_path : List[str]
         Variable number of file paths containing the data.
@@ -74,7 +74,7 @@ def running_std(inp: List[int], out: int, up_to_id = None, ddof: int = 1, *list_
     else:
         max_id = up_to_id + 1
 
-    mean = running_mean(inp, out, max_id - 1, *list_path)
+    mean = running_mean(out, max_id - 1, *list_path)
     for r in range(0, max_id):
         data = np.load(list_path[r])
         cumulative_sum += (data[:, out] - mean)**2

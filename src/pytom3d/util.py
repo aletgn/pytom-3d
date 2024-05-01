@@ -7,17 +7,7 @@ import pandas as pd
 import re
 from typing import Tuple, List, Any
 
-
-def summation(x, y):
-    return x+y
-
-
-def distance(x, y):
-    return (x**2+y**2)**0.5
-
-
-def distance2(x, y):
-    return (abs(2*x)+y**2)**0.5
+from pytom3d.stats import running_mean, running_std
 
 
 def export_regressor(regressor, folder: str = "./", filename: str = "my_regressor", extension: str = ".rg",
@@ -463,3 +453,55 @@ def update(method: callable):
 
         self.history_.append(event)
     return wrapper
+
+
+def contour_data_wrapper(path: str, match: str) -> Tuple[np.ndarray]:
+    """
+    Wrapper function for generating contour data.
+
+    Parameters
+    ----------
+    path : str
+        Path to the directory containing data files.
+    match : str
+        A string used to match the desired data files.
+
+    Returns
+    -------
+    Tuple[np.ndarray]
+        A tuple containing the x-coordinates, y-coordinates, mean value, and standard deviation.
+
+    """
+    data = recursive_search(path, match=match, pop_first=True, take_first=False)
+
+    mean = running_mean(3, None, *data)
+    std = running_std(3, None, 1, *data)
+    x, y = get_coordinates([0], *data), get_coordinates([1], *data)
+
+    return x.reshape(-1), y.reshape(-1), mean, std
+
+
+def scan_data_wrapper(path: str, match: str) -> Tuple[np.ndarray]:
+    """
+    Wrapper function for generating scan data.
+
+    Parameters
+    ----------
+    path : str
+        Path to the directory containing data files.
+    match : str
+        A string used to match the desired data files.
+
+    Returns
+    -------
+    Tuple[np.ndarray]
+        A tuple containing the x-coordinates, mean value, and standard deviation.
+
+    """
+    data = recursive_search(path, match=match, pop_first=True, take_first=False)
+
+    mean = running_mean(3, None, *data)
+    std = running_std(3, None, 1, *data)
+    x = get_coordinates([0], *data)
+
+    return x.reshape(-1), mean, std

@@ -18,6 +18,30 @@ class Scan:
         except KeyError:
             self.name = "Untitled"
 
+        try:
+            self.color = kwargs.pop("color")
+        except KeyError:
+            self.color = "k"
+
+        try:
+            self.line = kwargs.pop("line")
+        except KeyError:
+            self.line = "-"
+
+        try:
+            self.alpha = kwargs.pop("alpha")
+        except KeyError:
+            self.alpha = 0.3
+
+        try:
+            self.err_bar = kwargs.pop("err_bar")
+        except KeyError:
+            self.err_bar = False
+
+    def config_aspect(self, color, line, alpha):
+        self.color = color
+        self.line = line
+        self.alpha = alpha
 
     def load_file(self, reader: callable, path: str, **kwargs: Dict['str', Any]) -> None:
         """
@@ -37,8 +61,7 @@ class Scan:
         self.y = data.iloc[:, 1].to_numpy()
         self.y_err = data.iloc[:, 2].to_numpy()
 
-
-    def load_data(self, x: np.ndarray, y: np.ndarray, y_err) -> None:
+    def load_data(self, x: np.ndarray, y: np.ndarray, y_err: np.ndarray = None) -> None:
         """
         Load data directly.
 
@@ -53,7 +76,7 @@ class Scan:
         """
         self.x = x
         self.y = y
-        self.y_err = y
+        self.y_err = y_err
 
 
 def export_line_scan(reader: callable, path: str, *scans: List, **kwargs:  Dict['str', Any]) -> None:
