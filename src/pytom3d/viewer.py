@@ -212,6 +212,11 @@ class Viewer:
         ax.axis('tight')
         plt.show()
 
+    def contour(self, topography):
+        fig, ax = plt.subplots(dpi=300)
+        ax.tricontourf(topography.P[:, 0], topography.P[:, 1], topography.P[:, 2])
+        plt.show()
+
 
 class PostViewer:
 
