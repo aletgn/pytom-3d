@@ -33,11 +33,6 @@ class Scan:
         except KeyError:
             self.alpha = 0.3
 
-        try:
-            self.err_bar = kwargs.pop("err_bar")
-        except KeyError:
-            self.err_bar = False
-
     def config_aspect(self, color, line, alpha):
         self.color = color
         self.line = line

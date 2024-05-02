@@ -297,38 +297,92 @@ class PostViewer:
         self.mean_lim =  cbar_bounds(bot[2], top[2])
         self.std_lim = cbar_bounds(bot[3], top[3])
 
-    def scan_view(self, *scan: List) -> None:
+    def scan_view(self, swap: bool = False, *scan: List) -> None:
         """
-        Visualize scan data.
+        Plot scan data.
 
         Parameters
         ----------
+        swap : bool, optional
+            If True, swap x and y axes in the plot. Default is False.
         *scan : List
-            Variable number of scan objects. Each scan object should have attributes x, y, and y_err.
-            If y_err is not available, the function will plot only x and y.
+            List of scan data to plot. Each scan data should be provided as a list-like object.
 
         Returns
         -------
         None
-            This function does not return anything. It simply displays the plot.
 
         """
         fig, ax = plt.subplots(dpi=300)
-
         for s in scan:
-            if s.err_bar:
-                try:
-                    ax.errorbar(s.x, s.y, s.y_err, fmt="-o", markersize=3, capsize=3, capthick=1, linewidth=0.8)
-                except KeyError:
-                    ax.plot(s.x, s.y)
-            else:
-                try:
-                    ax.fill_between(s.x, s.y-s.y_err, s.y+s.y_err, alpha=0.5, edgecolor="none")
-                    ax.plot(s.x, s.y)
-                except KeyError:
-                    ax.plot(s.x, s.y)
+            if swap:
+                ax.plot(s.y, s.x)
 
-        plt.show()
+            else:
+                ax.plot(s.x, s.y)
+
+            plt.show()
+
+    def scan_view_and_fill(self, swap: bool = False, *scan: List) -> None:
+        """
+        Plot scan data with filled error regions.
+
+        Parameters
+        ----------
+        swap : bool, optional
+            If True, swap x and y axes in the plot. Default is False.
+        *scan : List
+            List of scan data to plot. Each scan data should be provided as a list-like object.
+
+        Returns
+        -------
+        None
+
+        """
+        fig, ax = plt.subplots(dpi=300)
+        for s in scan:
+            if swap:
+                if s.y_err is not None:
+                    ax.fill_betweenx(s.x, s.y-s.y_err, s.y+s.y_err, alpha=0.5, edgecolor="none")
+                ax.plot(s.y, s.x)
+
+            else:
+                if s.y_err is not None:
+                    ax.fill_between(s.x, s.y-s.y_err, s.y+s.y_err, alpha=0.5, edgecolor="none")
+                ax.plot(s.x, s.y)
+
+            plt.show()
+
+    def scan_view_and_bar(self, swap: bool = False, *scan: List) -> None:
+        """
+        Plot scan data with error bars.
+
+        Parameters
+        ----------
+        swap : bool, optional
+            If True, swap x and y axes in the plot. Default is False.
+        *scan : List
+            List of scan data to plot. Each scan data should be provided as a list-like object.
+
+        Returns
+        -------
+        None
+
+        """
+        fig, ax = plt.subplots(dpi=300)
+        for s in scan:
+            if swap:
+                if s.y_err is not None:
+                    ax.errorbar(s.y, s.x, xerr=s.y_err, yerr=None, fmt="-o",
+                                markersize=3, capsize=3, capthick=1, linewidth=0.8)
+                pass
+
+            else:
+                if s.y_err is not None:
+                    ax.errorbar(s.x, s.y, xerr=None, yerr=s.y_err, fmt="-o",
+                                markersize=3, capsize=3, capthick=1, linewidth=0.8)
+
+            plt.show()
 
     def contour_and_scan_2(self, top_cnt, bot_cnt, top_scan = None, bot_scan = None) -> None:
         """
