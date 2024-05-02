@@ -211,6 +211,41 @@ class Topography:
         self.P = self.P[indices, :]
         return [(len(self.history_), self.filter_points.__name__), ("indices", indices)]
 
+    def pick_points(self, axis: int, loc: float, tol: float = 1e-3) -> Tuple[np.ndarray]:
+        """
+        Pick points based on proximity to a specified location along a given axis.
+
+        Parameters
+        ----------
+        axis : int
+            The axis along which to pick points. 0 for x-axis, 1 for y-axis.
+        loc : float
+            The location along the specified axis to which points are compared.
+        tol : float, optional
+            The tolerance value for proximity. Default is 1e-3.
+
+        Returns
+        -------
+        picked_locs : array_like
+            Array of locations of the picked points.
+        picked_coords : array_like
+            Array of coordinates (along the other axis) of the picked points.
+        picked_values : array_like
+            Array of values of the picked points.
+
+        """
+        assert axis < 2
+
+        pick = np.where((np.abs(self.P[:, axis] - loc) < tol))[0]
+        picked_points = self.P[pick]
+        sorted_index = np.argsort(picked_points[:, 1-axis])
+        picked_points = picked_points[sorted_index]
+        picked_locs = picked_points[:, axis]
+        picked_coords = picked_points[:, 1-axis]
+        picked_values = picked_points[:, 2]
+
+        return picked_locs, picked_coords, picked_values
+    
     @update
     def translate(self, v: np.ndarray = np.array([0, 0, 0]), aux: bool = False) -> List[Tuple]:
         """
