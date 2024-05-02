@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as f:
 
 setup(
     name="pytom3d",
-    version="0.0.0rc1",
+    version="0.0.0rc2",
     description="PyToM-3D: Python Topography Manipulator in 3D",
     long_description=long_description,
     long_description_content_type="text/markdown",
