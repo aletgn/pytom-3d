@@ -1,9 +1,9 @@
-import numpy as np
-# import pandas as pd
-from numpy import cos, sin
 from typing import List, Tuple, Dict
-from pytom3d.util import update
+import numpy as np
+from numpy import cos, sin
 from scipy.interpolate import bisplrep, bisplev
+from pytom3d.util import update
+from pytom3d.scan import Scan
 
 class Topography:
 
@@ -246,6 +246,59 @@ class Topography:
 
         return picked_locs, picked_coords, picked_values
     
+    def pick_scans(self, axis: int, loc: float,
+                   centre: float = None, lower: float = None, upper: float = None,
+                   tol: float = 1e-3) -> Tuple:
+        """
+        Pick scans based on proximity to specified locations and bounds.
+
+        Parameters
+        ----------
+        axis : int
+            The axis along which to pick scans. 0 for x-axis, 1 for y-axis.
+        loc : float
+            The location along the specified axis to which points are compared.
+        centre : float, optional
+            The central location for the bounding box. If provided, `lower` and `upper`
+            must also be provided. Default is None.
+        lower : float, optional
+            The lower bound for the bounding box. Used in combination with `centre` and `upper`.
+            Default is None.
+        upper : float, optional
+            The upper bound for the bounding box. Used in combination with `centre` and `lower`.
+            Default is None.
+        tol : float, optional
+            The tolerance value for proximity. Default is 1e-3.
+
+        Returns
+        -------
+        scans : list of Scan objects
+            List of Scan objects picked based on the specified conditions.
+
+        """
+        picked_location, picked_coords, picked_values = self.pick_points(axis, loc, tol)
+
+        upper_bound = centre + upper
+        lower_bound = centre - lower
+
+        pick_up = np.where((np.abs(picked_coords - upper_bound) < tol))[0]
+        pick_lo = np.where((np.abs(picked_coords - lower_bound) < tol))[0]
+        pick_be = np.where((picked_coords < upper_bound) & (picked_coords > lower_bound))[0]
+
+        pick = np.concatenate([pick_up, pick_lo, pick_be])
+
+        print(pick_up, pick_lo, pick_be, pick)
+
+        scans = []
+        for p in pick:
+            print(picked_coords[p])
+            l, c, v = self.pick_points(1-axis, picked_coords[p], tol)
+            s = Scan()
+            s.load_data(c, v)
+            scans.append(s)
+            #! using a factory patter in Scan constructor would be more elegant
+        return scans
+
     @update
     def translate(self, v: np.ndarray = np.array([0, 0, 0]), aux: bool = False) -> List[Tuple]:
         """

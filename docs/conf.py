@@ -9,7 +9,7 @@
 project = 'PyToM-3D'
 copyright = '2024, Alessandro Tognan'
 author = 'Alessandro Tognan'
-release = '0.0.0rc2'
+release = '0.0.0rc3'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

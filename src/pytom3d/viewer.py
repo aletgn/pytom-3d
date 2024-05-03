@@ -326,7 +326,7 @@ class PostViewer:
             else:
                 ax.plot(s.x, s.y)
 
-            plt.show()
+        plt.show()
 
     def scan_view_and_fill(self, swap: bool = False, *scan: List) -> None:
         """
@@ -356,7 +356,7 @@ class PostViewer:
                     ax.fill_between(s.x, s.y-s.y_err, s.y+s.y_err, alpha=0.5, edgecolor="none")
                 ax.plot(s.x, s.y)
 
-            plt.show()
+        plt.show()
 
     def scan_view_and_bar(self, swap: bool = False, *scan: List) -> None:
         """
@@ -387,7 +387,7 @@ class PostViewer:
                     ax.errorbar(s.x, s.y, xerr=None, yerr=s.y_err, fmt="-o",
                                 markersize=3, capsize=3, capthick=1, linewidth=0.8)
 
-            plt.show()
+        plt.show()
 
     def contour_and_scan_2(self, top_cnt, bot_cnt, top_scan = None, bot_scan = None) -> None:
         """

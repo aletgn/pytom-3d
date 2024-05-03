@@ -96,3 +96,31 @@ def export_line_scan(reader: callable, path: str, *scans: List, **kwargs:  Dict[
     for s in scans:
         data = reader(s, **kwargs)
         data.to_excel(path, index=False)
+
+
+def scan_stat_factory(*scan: List):
+    """
+    Create a scan object representing the statistical summary of multiple scans.
+
+    Parameters
+    ----------
+    *scan : variable number of Scan objects
+        Scan objects to be summarized.
+
+    Returns
+    -------
+    av_scan : Scan object
+        Scan object representing the statistical summary of the input scans.
+
+    """
+    x = scan[0].x
+    values = np.array([s.y for s in scan])
+    squared_values = np.array([s.y**2 for s in scan])
+
+    mean = values.mean(axis=0)
+    quad = (squared_values.sum(axis=0)**0.5)/len(scan)
+
+    av_scan = Scan(name="av")
+    av_scan.load_data(x, mean, quad)
+
+    return av_scan
