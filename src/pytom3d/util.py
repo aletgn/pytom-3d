@@ -295,7 +295,7 @@ def recursive_search(path: str, extension: str = ".dat", match: str = None,
 
 def gather_data(match: str, inp: List[int], out: int, path: str, *list_path: List[str]) -> None:
     """
-    Load data from multiple files, extract specified columns, and save to an Excel file.
+    Load data from multiple files, extract specified columns, and save to a csv file.
 
     Parameters
     ----------
@@ -321,21 +321,19 @@ def gather_data(match: str, inp: List[int], out: int, path: str, *list_path: Lis
     """
     n2c = {"0": "x", "1": "y"}
     df = pd.DataFrame()
+    input_cols = np.load(list_path[0])[:, inp]
+    for r in range(0,len(inp)):
+        df.insert(r, n2c[str(r)], input_cols[:,r])
 
     for p in list_path:
+        print(p)
         list_idx = list_path.index(p)
         regex_idx = re.search(match, p).group(0)
-        input_cols = np.load(p)[:, inp]
         output_col = np.load(p)[:, out]
+        temp_df = pd.DataFrame({regex_idx: output_col})
 
-        if list_idx == 0:
-            for r in range(0,len(inp)):
-                df.insert(r, n2c[str(r)], input_cols[:,r])
-            df.insert(len(df.columns), regex_idx, output_col)
-        else:
-            df.insert(len(df.columns), regex_idx, output_col)
-
-    df.to_excel(path, index=False)
+        df = pd.concat([df, temp_df], axis=1)
+    df.to_csv(path, index=False)
 
 
 def get_coordinates(inp: List[int], *list_path: List[str]) -> np.ndarray:
