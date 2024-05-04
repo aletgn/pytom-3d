@@ -23,6 +23,7 @@ class Topography:
         self.name = name
         self.file_path = None
         self.P = None
+        self.unc = None
         self.N = None
         self.m = None
         self.M = None
@@ -243,8 +244,12 @@ class Topography:
         picked_locs = picked_points[:, axis]
         picked_coords = picked_points[:, 1-axis]
         picked_values = picked_points[:, 2]
+        try:
+            picked_uncertainty = self.unc[pick]
+        except:
+            picked_uncertainty = np.full(len(pick), None)
 
-        return picked_locs, picked_coords, picked_values
+        return picked_locs, picked_coords, picked_values, picked_uncertainty
     
     def pick_scans(self, axis: int, loc: float,
                    centre: float = None, lower: float = None, upper: float = None,
@@ -276,7 +281,7 @@ class Topography:
             List of Scan objects picked based on the specified conditions.
 
         """
-        picked_location, picked_coords, picked_values = self.pick_points(axis, loc, tol)
+        _, picked_coords, _, _ = self.pick_points(axis, loc, tol)
 
         upper_bound = centre + upper
         lower_bound = centre - lower
@@ -292,9 +297,9 @@ class Topography:
         scans = []
         for p in pick:
             print(picked_coords[p])
-            l, c, v = self.pick_points(1-axis, picked_coords[p], tol)
+            l, c, v, u = self.pick_points(1-axis, picked_coords[p], tol)
             s = Scan()
-            s.load_data(c, v)
+            s.load_data(c, v, u)
             scans.append(s)
             #! using a factory patter in Scan constructor would be more elegant
         return scans

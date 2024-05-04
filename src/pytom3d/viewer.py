@@ -389,7 +389,8 @@ class PostViewer:
 
         plt.show()
 
-    def contour_and_scan_2(self, top_cnt, bot_cnt, top_scan = None, bot_scan = None) -> None:
+    def contour_and_scan_2(self, top_cnt, bot_cnt, top_scan = None, bot_scan = None,
+                           top_err = None, bot_err = None) -> None:
         """
         Plot contour and scan data.
 
@@ -402,6 +403,10 @@ class PostViewer:
         top_scan : object, optional
             Object containing data for the top scan. Default is None.
         bot_scan : object, optional
+            Object containing data for the bottom scan. Default is None.
+        top_err : object, optional
+            Object containing data for the top scan. Default is None.
+        bot_err : object, optional
             Object containing data for the bottom scan. Default is None.
 
         Returns
@@ -449,10 +454,17 @@ class PostViewer:
         ax7.plot(top_scan.x, top_scan.y, top_scan.color, zorder=0, label=top_scan.name)
         ax7.fill_between(top_scan.x, top_scan.y-top_scan.y_err, top_scan.y+top_scan.y_err,
                         color=top_scan.color, alpha=top_scan.alpha, zorder=-1, edgecolor="none")
+        if top_err is not None:
+            ax7.errorbar(top_err.x, top_err.y, top_err.y_err, c=top_err.color, label=top_err.name,
+                         markersize=3, capsize=3, capthick=1, linewidth=0.8)
 
         ax8.plot(bot_scan.x, bot_scan.y, bot_scan.color, zorder=0, label=bot_scan.name)
         ax8.fill_between(bot_scan.x, bot_scan.y-bot_scan.y_err, bot_scan.y+bot_scan.y_err,
                         color=bot_scan.color, alpha=bot_scan.alpha, zorder=-1, edgecolor="none")
+
+        if bot_err is not None:
+            ax8.errorbar(bot_err.x, bot_err.y, bot_err.y_err, c=bot_err.color, label=bot_err.name,
+                         markersize=3, capsize=3, capthick=1, linewidth=0.8)
 
         for a in all_axs:
             a.tick_params(direction="in", top=1, right=1, color="k") # pad=5

@@ -115,10 +115,10 @@ def scan_stat_factory(*scan: List):
     """
     x = scan[0].x
     values = np.array([s.y for s in scan])
-    squared_values = np.array([s.y**2 for s in scan])
+    squared_uncertainty = np.array([np.square(s.y_err) for s in scan])
 
     mean = values.mean(axis=0)
-    quad = (squared_values.sum(axis=0)**0.5)/len(scan)
+    quad = np.sqrt(squared_uncertainty.sum(axis=0))/len(scan)
 
     av_scan = Scan(name="av")
     av_scan.load_data(x, mean, quad)
