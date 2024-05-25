@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import re
 from typing import Tuple, List, Any
+from matplotlib import pyplot as plt
 
 from pytom3d.stats import running_mean, running_std
 
@@ -503,3 +504,37 @@ def scan_data_wrapper(path: str, match: str) -> Tuple[np.ndarray]:
     x = get_coordinates([0], *data)
 
     return x.reshape(-1), mean, std
+
+
+def printer(func: callable):
+    """
+    A decorator for class methods that saves a figure if 'save' is True.
+
+    Borrowed from https://github.com/aletgn/b-fade/blob/master/src/bfade/util.py
+
+    This decorator wraps a method that generates a figure and a title,
+    and it saves the figure to the specified location if 'save' is True.
+
+    Parameters
+    ----------
+    func : callable
+        The function to be decorated, which generates a figure and a title.
+
+    Returns
+    -------
+    callable
+        The decorated function.
+    """
+    @functools.wraps(func) # <- preserve function signature
+    def saver(self, *args, **kwargs):
+        fig, title = func(self, *args, **kwargs)
+        if self.save == True:
+            fig.savefig(self.folder + title + "." + self.fmt,
+                        format = self.fmt,
+                        dpi = self.dpi,
+                        bbox_inches='tight')
+            print(f"SAVE: {title}")
+        else:
+            print(f"SHOW: {title}")
+            plt.show()
+    return saver

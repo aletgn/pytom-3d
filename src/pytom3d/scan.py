@@ -98,14 +98,20 @@ def export_line_scan(reader: callable, path: str, *scans: List, **kwargs:  Dict[
         data.to_excel(path, index=False)
 
 
-def scan_stat_factory(*scan: List):
+def scan_stat_factory(name: str = "av", color: str = "k", linestyle: str = "-", *scan: List):
     """
     Create a scan object representing the statistical summary of multiple scans.
 
     Parameters
     ----------
-    *scan : variable number of Scan objects
-        Scan objects to be summarized.
+    name: str
+        Name to be assigned to the output scan
+    color: str
+        Color to be assigned to the output scan
+    linestyle:
+        Linestyle to be assigned to the output scan
+    scan : variable number of Scan objects
+        Scan objects to be processed.
 
     Returns
     -------
@@ -120,7 +126,7 @@ def scan_stat_factory(*scan: List):
     mean = values.mean(axis=0)
     quad = np.sqrt(squared_uncertainty.sum(axis=0))/len(scan)
 
-    av_scan = Scan(name="av")
+    av_scan = Scan(name=name, line=linestyle, color=color)
     av_scan.load_data(x, mean, quad)
 
     return av_scan

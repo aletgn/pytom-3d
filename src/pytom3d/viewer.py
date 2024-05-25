@@ -1,4 +1,5 @@
 from pytom3d.core import Topography
+from pytom3d.util import printer
 # from util import summation, distance, distance2
 from matplotlib import pyplot as plt
 from typing import List, Tuple
@@ -41,7 +42,88 @@ class Viewer:
         self.x_lim = None
         self.y_lim = None
         self.z_lim = None
-        
+        self.config()
+        self.config_3d()
+
+    def config(self, save: bool = False, folder: str = "./", fmt: str = "png", dpi: int = 300) -> None:
+        """
+        Configure settings for saving plots.
+
+        Borrowed from https://github.com/aletgn/b-fade/
+
+        Parameters
+        ----------
+        save : bool, optional
+            Flag indicating whether to save plots. The default is False.
+        folder : str, optional
+            Folder path where plots will be saved. The default is "./".
+        fmt : str, optional
+            Format for saving plots. The default is "png".
+        dpi : int, optional
+            Dots per inch for saving plots. The default is 300.
+
+        Returns
+        -------
+        None
+
+        """
+        self.save = save
+        self.folder = folder
+        self.fmt = fmt
+        self.dpi = dpi
+
+    def config_3d(self, point_size: float = 0.3, cmap: str = "RdYlBu_r",
+                  xlabel: str = r'$x_g$ [mm]',
+                  ylabel: str = r'$y_g$ [mm]',
+                  zlabel: str = r'$u(x_g, y_g)$ [mm]',
+                  x_lim: List = [-110, 110],
+                  y_lim: List = [-38, 38],
+                  z_lim: List = None,
+                  zticks: int = 10,
+                  zoom: float = 1) -> None:
+        """
+        Configure the 3D plot parameters.
+
+        Parameters
+        ----------
+        point_size : float, optional
+            Size of the points in the plot (default is 0.3).
+        cmap : str, optional
+            Colormap for the plot (default is "RdYlBu_r").
+        xlabel : str, optional
+            Label for the x-axis (default is r'$x_g$ [mm]').
+        ylabel : str, optional
+            Label for the y-axis (default is r'$y_g$ [mm]').
+        zlabel : str, optional
+            Label for the z-axis (default is r'$u(x_g, y_g)$ [mm]').
+        x_lim : list of int, optional
+            Limits for the x-axis (default is [-110, 110]).
+        y_lim : list of int, optional
+            Limits for the y-axis (default is [-38, 38]).
+        z_lim : list of int or None, optional
+            Limits for the z-axis (default is None).
+        zticks : int, optional
+            Number of ticks on the z-axis (default is 10).
+        zoom : float, optional
+            Zoom level for the plot (default is 1).
+
+        Returns
+        -------
+        None
+
+        """
+        self.point_size = point_size
+        self.cmap = cmap
+        self.xlabel = xlabel
+        self.ylabel = ylabel
+        self.zlabel = zlabel
+        self.x_lim = x_lim
+        self.y_lim = y_lim
+        self.z_lim = z_lim
+        self.zticks = zticks
+        self.zoom = zoom
+
+
     def set_limits(self, x: List[float] = None, y: List[float] = None, z: List[float] = None) -> None:
         """
         Set the limits for the x, y, and z axes.
@@ -103,6 +185,7 @@ class Viewer:
         plt.gcf().tight_layout(pad=1)
         plt.show()
 
+    @printer
     def scatter3D(self, *data: List[Topography]) -> None:
         """
         Generate a 3D scatter plot for the given Topography data.
@@ -139,9 +222,9 @@ class Viewer:
             vmax = np.array([h.M[2] for h in data]).max()
             ax.set_zlim([vmin, vmax])
 
-        ax.set_xlabel("x [mm]")
-        ax.set_ylabel("y [mm]")
-        ax.set_zlabel("z [mm]")
+        ax.set_xlabel(self.xlabel)
+        ax.set_ylabel(self.ylabel)
+        ax.set_zlabel(self.zlabel)
 
         ax.xaxis.pane.set_color('w')
         ax.yaxis.pane.set_edgecolor('w')
@@ -151,24 +234,28 @@ class Viewer:
         ax.zaxis.pane.set_color('w')
 
         plt.gca().xaxis.set_major_formatter(ticker.StrMethodFormatter("{x:.0f}"))
-        plt.gca().yaxis.set_major_formatter(ticker.StrMethodFormatter("{x:.1f}"))
+        plt.gca().yaxis.set_major_formatter(ticker.StrMethodFormatter("{x:.0f}"))
         plt.gca().zaxis.set_major_formatter(ticker.StrMethodFormatter("{x:.2f}"))
     
-        ax.grid(True)
+        ax.xaxis._axinfo['grid'].update(color = 'grey', linestyle = ':', linewidth = 0.5)
+        ax.yaxis._axinfo['grid'].update(color = 'grey', linestyle = ':', linewidth = 0.5)
+        ax.zaxis._axinfo['grid'].update(color = 'grey', linestyle = ':', linewidth = 0.5)
 
         for d in data:
-            sc = ax.scatter3D(d.P[:, 0], d.P[:, 1], d.P[:, 2], s=0.5, alpha=1,
-                              vmin=vmin, vmax=vmax, c=d.P[:, 2])
+            sc = ax.scatter(d.P[:, 0], d.P[:, 1], d.P[:, 2], s=self.point_size, alpha=1,
+                              vmin=vmin, vmax=vmax, c=d.P[:, 2],  marker="o",
+                              cmap=self.cmap)
 
-        cbar = fig.colorbar(sc, ax=ax, orientation="vertical",
-                            pad=0.12, format="%.2f",
-                            ticks=list(np.linspace(vmin,
-                                                   vmax, 11)),
-                            label='Altitude')
-        cbar.ax.tick_params(direction='in', right=1, left=1, size=2.5)
+        # cbar = fig.colorbar(sc, ax=ax, orientation="vertical",
+        #                     pad=0.12, format="%.2f",
+        #                     ticks=list(np.linspace(vmin,
+        #                                            vmax, 11)),
+        #                     label=self.zlabel)
+        # cbar.ax.tick_params(direction='in', right=1, left=1, size=2.5)
 
-        ax.axis('tight')
-        plt.show()
+        # ax.axis('tight')
+        ax.set_box_aspect(None, zoom=self.zoom)
+        return fig, self.name
 
     def scatter3DRegression(self, regression: Topography, reference: Topography = None) -> None:
         fig = plt.figure(dpi=300)
@@ -227,10 +314,47 @@ class PostViewer:
         except KeyError:
             self.name = "Untitled"
 
+        self.config()
+        self.config_scan_view()
         self.config_canvas()
 
+    def config(self, save: bool = False, folder: str = "./", fmt: str = "png", dpi: int = 300) -> None:
+        """
+        Configure settings for saving plots.
 
-    def config_canvas(self, dpi: int = 300, cmap: str = "RdYlBu_r", levels: int = 8,
+        Borrowed from https://github.com/aletgn/b-fade/
+
+        Parameters
+        ----------
+        save : bool, optional
+            Flag indicating whether to save plots. The default is False.
+        folder : str, optional
+            Folder path where plots will be saved. The default is "./".
+        fmt : str, optional
+            Format for saving plots. The default is "png".
+        dpi : int, optional
+            Dots per inch for saving plots. The default is 300.
+
+        Returns
+        -------
+        None
+
+        """
+        self.save = save
+        self.folder = folder
+        self.fmt = fmt
+        self.dpi = dpi
+
+    def config_scan_view(self, xlabel=r'$x$ [mm]', ylabel=r'$y$ [mm]', x_lim=[-20, 20], 
+                         y_lim=[-70, 70], legend_config = None):
+
+        self.xlabel = xlabel
+        self.ylabel = ylabel
+        self.x_lim = x_lim
+        self.y_lim = y_lim
+        self.legend_config = legend_config
+
+    def config_canvas(self, cmap: str = "RdYlBu_r", levels: int = 8,
                       x_lim: List[float] = [-100, 100], y_lim_top: List[float] = [10,20],
                       y_lim_bot: List[float] = [-10,-20], y_lim_scan: str = [-140, 140],
                       cbar_lim: List[float] = [-140, 140], loc: str = "best",
@@ -240,8 +364,6 @@ class PostViewer:
 
         Parameters
         ----------
-        dpi : int, optional
-            Dots per inch for the plot resolution. Default is 300.
         cmap : str, optional
             Colormap to use for plotting. Default is "RdYlBu_r".
         levels : int, optional
@@ -266,8 +388,6 @@ class PostViewer:
         None
             This function does not return anything. It only sets instance attributes.
         """
-        self.dpi = dpi
-
         self.cmap = cmap
         self.levels = levels
 
@@ -358,6 +478,7 @@ class PostViewer:
 
         plt.show()
 
+    @printer
     def scan_view_and_bar(self, swap: bool = False, *scan: List) -> None:
         """
         Plot scan data with error bars.
@@ -366,7 +487,7 @@ class PostViewer:
         ----------
         swap : bool, optional
             If True, swap x and y axes in the plot. Default is False.
-        *scan : List
+        scan : List
             List of scan data to plot. Each scan data should be provided as a list-like object.
 
         Returns
@@ -378,16 +499,116 @@ class PostViewer:
         for s in scan:
             if swap:
                 if s.y_err is not None:
-                    ax.errorbar(s.y, s.x, xerr=s.y_err, yerr=None, fmt="-o",
+                    ax.errorbar(s.y, s.x, xerr=s.y_err, yerr=None, fmt="o",
                                 markersize=3, capsize=3, capthick=1, linewidth=0.8)
                 pass
 
             else:
                 if s.y_err is not None:
-                    ax.errorbar(s.x, s.y, xerr=None, yerr=s.y_err, fmt="-o",
-                                markersize=3, capsize=3, capthick=1, linewidth=0.8)
+                    ax.errorbar(s.x, s.y, xerr=None, yerr=s.y_err, fmt="o", c=s.color,
+                                linestyle=s.line, markersize=3, capsize=3, capthick=1, linewidth=0.8, label=s.name)
 
-        plt.show()
+        ax.set_xlabel(self.xlabel)
+        ax.set_ylabel(self.ylabel)
+        ax.set_xlim(self.x_lim)
+        ax.set_ylim(self.y_lim)
+        try:
+            ax.legend(**self.legend_config)
+        except:
+            pass
+
+        return fig, self.name
+
+    @printer
+    def scan_compare(self, fills: List, bars: List) -> Tuple:
+        """
+        Compare scans by plotting filled regions and error bars.
+
+        Parameters
+        ----------
+        fills : list of scans
+            List of data for the filled regions.
+        bars : list of scans
+            List of data for the error bars.
+
+        Returns
+        -------
+        fig : Figure
+            The matplotlib figure object.
+        name : str
+            The name associated with the plot.
+
+        """
+        fig, ax = plt.subplots(dpi=300)
+        for f in fills:
+            ax.fill_between(f.x, f.y-f.y_err, f.y+f.y_err, color=f.color, alpha=f.alpha, edgecolor="none")
+            ax.plot(f.x, f.y, color=f.color, label=f.name)
+        for b in bars:
+            ax.errorbar(b.x, b.y, xerr=None, yerr=b.y_err, fmt="o", c=b.color,
+                                    linestyle=b.line, markersize=3, capsize=3,
+                                    capthick=1, linewidth=0.8, label=b.name)
+
+        ax.legend(**self.legend_config)
+        ax.set_xlim(self.x_lim)
+        ax.set_ylim(self.y_lim)
+        ax.set_xlabel(self.xlabel)
+        ax.set_ylabel(self.ylabel)
+
+        return fig, self.name
+
+    @printer
+    def contour(self, top_cnt, bot_cnt) -> Tuple:
+        """
+        Create contour plots for the provided data.
+
+        Parameters
+        ----------
+        top_cnt : Topography object
+            Data for the top contour plot.
+        bot_cnt : Topography object
+            Data for the bottom contour plot.
+
+        Returns
+        -------
+        fig : Figure
+            The matplotlib figure object.
+        name : str
+            The name associated with the plot.
+
+        """
+        fig = plt.figure(dpi=self.dpi, figsize=(4,4))
+        gs = GridSpec(4, 2, figure=fig,
+                        width_ratios=[0.975, 0.025],
+                        height_ratios=[0.25, 0.25, 0.25, 0.25])
+        ax1 = fig.add_subplot(gs[0, 0])
+        ax2 = fig.add_subplot(gs[1, 0])
+        ax3 = fig.add_subplot(gs[0:2, 1])
+        ax4 = fig.add_subplot(gs[2, 0])
+        ax5 = fig.add_subplot(gs[3, 0])
+        ax6 = fig.add_subplot(gs[2:4, 1])
+
+        im12, norm12 = discrete_colorbar(self.cmap, self.mean_lim[0], self.mean_lim[1], self.levels)
+        a1 = ax1.tricontourf(top_cnt.P[:,0], top_cnt.P[:,1], top_cnt.P[:,2], levels=self.levels, cmap=self.cmap, norm=norm12)
+        a2 = ax2.tricontourf(bot_cnt.P[:,0], bot_cnt.P[:,1], bot_cnt.P[:,2], levels=self.levels, cmap=self.cmap, norm=norm12)
+        cb1 = fig.colorbar(im12, ax=[a1,a2], cax=ax3, orientation='vertical', label="Expected Value", format="%.0f", pad=0.1, fraction=0.5,
+                        ticks=(np.linspace(self.mean_lim[0], self.mean_lim[1], self.levels)))
+
+        im45, norm45 = discrete_colorbar(self.cmap, self.std_lim[0], self.std_lim[1], self.levels)
+        a4 = ax4.tricontourf(top_cnt.P[:,0], top_cnt.P[:,1], top_cnt.unc, levels=self.levels, cmap=self.cmap, norm=norm45)
+        a5 = ax5.tricontourf(bot_cnt.P[:,0], bot_cnt.P[:,1], bot_cnt.unc, levels=self.levels, cmap=self.cmap, norm=norm45)
+        cb2 = fig.colorbar(im45, cax=ax6, orientation='vertical', label="Uncertainty", format="%.0f", pad=0.1,
+                        ticks=list(np.linspace(self.std_lim[0], self.std_lim[1], self.levels)))
+
+        for a in [ax1, ax2, ax4, ax5]:
+            a.tick_params(direction="in", top=1, right=1, color="k") # pad=5
+            a.set_xlabel(r"$x$ [mm]")
+            a.set_ylabel(r"$y$ [mm]")
+
+        for c in [cb1, cb2]:
+            c.ax.tick_params(direction='in', right=1, left=1, size=1.5, labelsize=8)
+
+        plt.tight_layout()
+        return fig, self.name
 
     def contour_and_scan_2(self, top_cnt, bot_cnt, top_scan = None, bot_scan = None,
                            top_err = None, bot_err = None) -> None:
@@ -499,6 +720,8 @@ def cfg_matplotlib(font_size: int = 12, font_family: str = 'sans-serif', use_lat
     """
     Set Matplotlib RC parameters for font size, font family, and LaTeX usage.
 
+    Borrowed from https://github.com/aletgn/b-fade/blob/master/src/bfade/util.py
+
     Parameters
     ----------
     font_size : int, optional
@@ -521,6 +744,7 @@ def cfg_matplotlib(font_size: int = 12, font_family: str = 'sans-serif', use_lat
     matplotlib.rcParams['font.size'] = font_size
     matplotlib.rcParams['font.family'] = font_family
     matplotlib.rcParams['text.usetex'] = use_latex
+    matplotlib.rcParams["interactive"] = interactive
 
 
 def cbar_bounds(v: np.ndarray, w: np.ndarray) -> Tuple[float]:
