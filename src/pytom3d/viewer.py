@@ -76,6 +76,7 @@ class Viewer:
                   xlabel: str = r'$x_g$ [mm]',
                   ylabel: str = r'$y_g$ [mm]',
                   zlabel: str = r'$u(x_g, y_g)$ [mm]',
+                  cbarlabel: str = "Aux",
                   x_lim: List = [-110, 110],
                   y_lim: List = [-38, 38],
                   z_lim: List = None,
@@ -96,6 +97,8 @@ class Viewer:
             Label for the y-axis (default is r'$y_g$ [mm]').
         zlabel : str, optional
             Label for the z-axis (default is r'$u(x_g, y_g)$ [mm]').
+        cbarlabel : str, optional
+            Label for the colourbar (default is 'Aux').
         x_lim : list of int, optional
             Limits for the x-axis (default is [-110, 110]).
         y_lim : list of int, optional
@@ -117,6 +120,7 @@ class Viewer:
         self.xlabel = xlabel
         self.ylabel = ylabel
         self.zlabel = zlabel
+        self.cbarlabel = cbarlabel
         self.x_lim = x_lim
         self.y_lim = y_lim
         self.z_lim = z_lim
@@ -255,6 +259,62 @@ class Viewer:
 
         # ax.axis('tight')
         ax.set_box_aspect(None, zoom=self.zoom)
+        return fig, self.name
+
+    @printer
+    def scatter3DRegressorUnc(self, *data: List):
+        """
+        Create a 3D scatter plot of the regressor uncertainties.
+
+        Parameters
+        ----------
+        data : List
+            Set of Topographies.
+
+        Returns
+        -------
+        matplotlib.figure.Figure
+            The created figure.
+        str
+            The name of the plot.
+
+        """
+        fig = plt.figure(dpi=300)
+        ax = fig.add_subplot(1, 1, 1, projection='3d')
+        vmin = np.array([d.unc for d in data]).min()
+        vmax = np.array([d.unc for d in data]).max()
+
+        ax.set_xlabel(self.xlabel)
+        ax.set_ylabel(self.ylabel)
+        ax.set_zlabel(self.zlabel)
+
+        ax.xaxis.pane.set_color('w')
+        ax.yaxis.pane.set_edgecolor('w')
+        ax.zaxis.pane.set_edgecolor('w')
+        ax.xaxis.pane.set_color('w')
+        ax.yaxis.pane.set_color('w')
+        ax.zaxis.pane.set_color('w')
+
+        plt.gca().xaxis.set_major_formatter(ticker.StrMethodFormatter("{x:.0f}"))
+        plt.gca().yaxis.set_major_formatter(ticker.StrMethodFormatter("{x:.0f}"))
+        plt.gca().zaxis.set_major_formatter(ticker.StrMethodFormatter("{x:.2f}"))
+
+        ax.xaxis._axinfo['grid'].update(color = 'grey', linestyle = ':', linewidth = 0.5)
+        ax.yaxis._axinfo['grid'].update(color = 'grey', linestyle = ':', linewidth = 0.5)
+        ax.zaxis._axinfo['grid'].update(color = 'grey', linestyle = ':', linewidth = 0.5)
+
+        for d in data:
+            sc = ax.scatter(d.P[:, 0], d.P[:, 1], d.P[:, 2], s=self.point_size, alpha=1,
+                                vmin=vmin, vmax=vmax, c=d.unc,  marker="o",
+                                cmap=self.cmap)
+
+        cbar = fig.colorbar(sc, ax=ax, orientation="vertical",
+                            pad=0.12, format="%.2e",
+                            ticks=list(np.linspace(vmin,
+                                                    vmax, 11)),
+                            label=self.cbarlabel)
+        cbar.ax.tick_params(direction='in', right=1, left=1, size=2.5)
+
         return fig, self.name
 
     def scatter3DRegression(self, regression: Topography, reference: Topography = None) -> None:
