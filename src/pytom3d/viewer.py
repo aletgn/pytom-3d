@@ -2,7 +2,7 @@ from pytom3d.core import Topography
 from pytom3d.util import printer
 # from util import summation, distance, distance2
 from matplotlib import pyplot as plt
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 import matplotlib
 from matplotlib import ticker
 import matplotlib.cm as cm
@@ -580,7 +580,7 @@ class PostViewer:
         return fig, self.name
 
     @printer
-    def scan_compare(self, fills: List, bars: List) -> Tuple:
+    def scan_compare(self, fills: List, bars: List, strip: Dict = None) -> Tuple:
         """
         Compare scans by plotting filled regions and error bars.
 
@@ -597,22 +597,40 @@ class PostViewer:
             The matplotlib figure object.
         name : str
             The name associated with the plot.
+        strip : Dict
+            Dictionary containing the information to draw a strip over the plot.
+
+        Example
+        -------
+            strip = {"xs": [-10, 10], "label": "FILL", "color": "grey", "alpha": 0.2,
+                 "labelleft": "LEFT", "labelright": "RIGHT", "epsh": 5, "epsv": 10}
 
         """
         fig, ax = plt.subplots(dpi=300)
         for f in fills:
-            ax.fill_between(f.x, f.y-f.y_err, f.y+f.y_err, color=f.color, alpha=f.alpha, edgecolor="none")
+            ax.fill_between(f.x, f.y-f.y_err, f.y+f.y_err, color=f.color, alpha=f.alpha, edgecolor="none", zorder=1)
             ax.plot(f.x, f.y, color=f.color, label=f.name)
         for b in bars:
             ax.errorbar(b.x, b.y, xerr=None, yerr=b.y_err, fmt="o", c=b.color,
                                     linestyle=b.line, markersize=3, capsize=3,
-                                    capthick=1, linewidth=0.8, label=b.name)
+                                    capthick=1, linewidth=0.8, label=b.name, zorder=2)
 
-        ax.legend(**self.legend_config)
         ax.set_xlim(self.x_lim)
         ax.set_ylim(self.y_lim)
         ax.set_xlabel(self.xlabel)
         ax.set_ylabel(self.ylabel)
+
+        if strip is not None:
+            ax.fill_betweenx(self.y_lim, strip["xs"][0], strip["xs"][1], edgecolor="none", linewidth=0,
+                            color=strip["color"], alpha=strip["alpha"], zorder=0)
+            ax.text(0.5*strip["xs"][0]+0.5*strip["xs"][1], self.y_lim[1]-strip["epsv"], strip["label"],
+                    horizontalalignment='center', verticalalignment='center')
+            ax.text(strip["xs"][0]-strip["epsh"], self.y_lim[0]+strip["epsv"], strip["labelleft"],
+                    horizontalalignment='center', verticalalignment='center')
+            ax.text(strip["xs"][1]+strip["epsh"], self.y_lim[0]+strip["epsv"], strip["labelright"],
+                    horizontalalignment='center', verticalalignment='center')
+
+        ax.legend(**self.legend_config)
 
         return fig, self.name
 
