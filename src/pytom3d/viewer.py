@@ -572,6 +572,7 @@ class PostViewer:
         ax.set_ylabel(self.ylabel)
         ax.set_xlim(self.x_lim)
         ax.set_ylim(self.y_lim)
+        ax.tick_params(direction="in", top=1, right=1, color="k")
         try:
             ax.legend(**self.legend_config)
         except:
@@ -629,7 +630,7 @@ class PostViewer:
                     horizontalalignment='center', verticalalignment='center')
             ax.text(strip["xs"][1]+strip["epsh"], self.y_lim[0]+strip["epsv"], strip["labelright"],
                     horizontalalignment='center', verticalalignment='center')
-
+        ax.tick_params(direction="in", top=1, right=1, color="k")
         ax.legend(**self.legend_config)
 
         return fig, self.name
