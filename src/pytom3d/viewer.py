@@ -462,7 +462,7 @@ class PostViewer:
         self.loc = loc
         self.bbox_to_anchor = bbox_to_anchor
 
-    def config_colourbar(self, top, bot) -> None:
+    def config_colourbar(self, top = None, bot = None) -> None:
         """
         Configure color bar limits based on top and bottom bounds.
 
@@ -539,7 +539,7 @@ class PostViewer:
         plt.show()
 
     @printer
-    def scan_view_and_bar(self, swap: bool = False, *scan: List) -> None:
+    def scan_view_and_bar(self, swap: bool = False, strip: Dict = None, *scan: List) -> None:
         """
         Plot scan data with error bars.
 
@@ -549,7 +549,13 @@ class PostViewer:
             If True, swap x and y axes in the plot. Default is False.
         scan : List
             List of scan data to plot. Each scan data should be provided as a list-like object.
+        strip : Dict
+            Dictionary containing the information to draw a strip over the plot.
 
+        Example
+        -------
+            strip = {"xs": [-10, 10], "label": "FILL", "color": "grey", "alpha": 0.2,
+                 "labelleft": "LEFT", "labelright": "RIGHT", "epsh": 5, "epsv": 10}
         Returns
         -------
         None
@@ -573,6 +579,17 @@ class PostViewer:
         ax.set_xlim(self.x_lim)
         ax.set_ylim(self.y_lim)
         ax.tick_params(direction="in", top=1, right=1, color="k")
+
+        if strip is not None:
+            ax.fill_betweenx(self.y_lim, strip["xs"][0], strip["xs"][1], edgecolor="none", linewidth=0,
+                            color=strip["color"], alpha=strip["alpha"], zorder=0)
+            ax.text(0.5*strip["xs"][0]+0.5*strip["xs"][1], self.y_lim[1]-strip["epsv"], strip["label"],
+                    horizontalalignment='center', verticalalignment='center')
+            ax.text(strip["xs"][0]-strip["epsh"], self.y_lim[0]+strip["epsv"], strip["labelleft"],
+                    horizontalalignment='center', verticalalignment='center')
+            ax.text(strip["xs"][1]+strip["epsh"], self.y_lim[0]+strip["epsv"], strip["labelright"],
+                    horizontalalignment='center', verticalalignment='center')
+
         try:
             ax.legend(**self.legend_config)
         except:
@@ -636,7 +653,7 @@ class PostViewer:
         return fig, self.name
 
     @printer
-    def contour(self, top_cnt, bot_cnt) -> Tuple:
+    def contour(self, top_cnt, bot_cnt, cbarlabeltop: str = "Expected Value", cbarlabelbot: str = "Uncertainty") -> Tuple:
         """
         Create contour plots for the provided data.
 
@@ -646,6 +663,10 @@ class PostViewer:
             Data for the top contour plot.
         bot_cnt : Topography object
             Data for the bottom contour plot.
+        cbarlabeltop : str
+            Label of the top colour bar
+        cbarlabelbot : str
+            Label of the bot colour bar
 
         Returns
         -------
@@ -669,19 +690,19 @@ class PostViewer:
         im12, norm12 = discrete_colorbar(self.cmap, self.mean_lim[0], self.mean_lim[1], self.levels)
         a1 = ax1.tricontourf(top_cnt.P[:,0], top_cnt.P[:,1], top_cnt.P[:,2], levels=self.levels, cmap=self.cmap, norm=norm12)
         a2 = ax2.tricontourf(bot_cnt.P[:,0], bot_cnt.P[:,1], bot_cnt.P[:,2], levels=self.levels, cmap=self.cmap, norm=norm12)
-        cb1 = fig.colorbar(im12, ax=[a1,a2], cax=ax3, orientation='vertical', label="Expected Value", format="%.0f", pad=0.1, fraction=0.5,
+        cb1 = fig.colorbar(im12, ax=[a1,a2], cax=ax3, orientation='vertical', label=cbarlabeltop, format="%.0f", pad=0.1, fraction=0.5,
                         ticks=(np.linspace(self.mean_lim[0], self.mean_lim[1], self.levels)))
 
         im45, norm45 = discrete_colorbar(self.cmap, self.std_lim[0], self.std_lim[1], self.levels)
         a4 = ax4.tricontourf(top_cnt.P[:,0], top_cnt.P[:,1], top_cnt.unc, levels=self.levels, cmap=self.cmap, norm=norm45)
         a5 = ax5.tricontourf(bot_cnt.P[:,0], bot_cnt.P[:,1], bot_cnt.unc, levels=self.levels, cmap=self.cmap, norm=norm45)
-        cb2 = fig.colorbar(im45, cax=ax6, orientation='vertical', label="Uncertainty", format="%.0f", pad=0.1,
+        cb2 = fig.colorbar(im45, cax=ax6, orientation='vertical', label=cbarlabelbot, format="%.0f", pad=0.1,
                         ticks=list(np.linspace(self.std_lim[0], self.std_lim[1], self.levels)))
 
         for a in [ax1, ax2, ax4, ax5]:
             a.tick_params(direction="in", top=1, right=1, color="k") # pad=5
-            a.set_xlabel(r"$x$ [mm]")
-            a.set_ylabel(r"$y$ [mm]")
+            a.set_xlabel(self.xlabel)
+            a.set_ylabel(self.ylabel)
 
         for c in [cb1, cb2]:
             c.ax.tick_params(direction='in', right=1, left=1, size=1.5, labelsize=8)
