@@ -598,7 +598,7 @@ class PostViewer:
         return fig, self.name
 
     @printer
-    def scan_compare(self, fills: List, bars: List, strip: Dict = None) -> Tuple:
+    def scan_compare(self, fills: List, bars: List, regular: List = None, strip: Dict = None) -> Tuple:
         """
         Compare scans by plotting filled regions and error bars.
 
@@ -608,6 +608,8 @@ class PostViewer:
             List of data for the filled regions.
         bars : list of scans
             List of data for the error bars.
+        regular : list of scans
+            List of data for without fills and bars. The default is None
 
         Returns
         -------
@@ -632,6 +634,9 @@ class PostViewer:
             ax.errorbar(b.x, b.y, xerr=None, yerr=b.y_err, fmt="o", c=b.color,
                                     linestyle=b.line, markersize=3, capsize=3,
                                     capthick=1, linewidth=0.8, label=b.name, zorder=2)
+        if regular is not None:
+            for r in regular:
+                ax.plot(r.x, r.y, color=r.color, marker=r.marker, markersize=3, label=r.name)
 
         ax.set_xlim(self.x_lim)
         ax.set_ylim(self.y_lim)
@@ -650,6 +655,33 @@ class PostViewer:
         ax.tick_params(direction="in", top=1, right=1, color="k")
         ax.legend(**self.legend_config)
 
+        return fig, self.name
+
+    @printer
+    def basic_contour(self, top_cnt, bot_cnt, cbarlabeltop: str = "Expected Value") -> Tuple:
+        fig = plt.figure(dpi=self.dpi, figsize=(4,2))
+        gs = GridSpec(2, 2, figure=fig,
+                        width_ratios=[0.975, 0.025],
+                        height_ratios=[0.5, 0.5])
+        ax1 = fig.add_subplot(gs[0, 0])
+        ax2 = fig.add_subplot(gs[1, 0])
+        ax3 = fig.add_subplot(gs[0:2, 1])
+
+        im12, norm12 = discrete_colorbar(self.cmap, self.mean_lim[0], self.mean_lim[1], self.levels)
+        a1 = ax1.tricontourf(top_cnt.P[:,0], top_cnt.P[:,1], top_cnt.P[:,2], levels=self.levels, cmap=self.cmap, norm=norm12)
+        a2 = ax2.tricontourf(bot_cnt.P[:,0], bot_cnt.P[:,1], bot_cnt.P[:,2], levels=self.levels, cmap=self.cmap, norm=norm12)
+        cb1 = fig.colorbar(im12, ax=[a1,a2], cax=ax3, orientation='vertical', label=cbarlabeltop, format="%.0f", pad=0.1, fraction=0.5,
+                        ticks=(np.linspace(self.mean_lim[0], self.mean_lim[1], self.levels)))
+
+        for a in [ax1, ax2]:
+            a.tick_params(direction="in", top=1, right=1, color="k") # pad=5
+            a.set_xlabel(self.xlabel)
+            a.set_xticks([-50, 0, 50])
+            a.set_ylabel(self.ylabel)
+
+        cb1.ax.tick_params(direction='in', right=1, left=1, size=1.5, labelsize=8)
+
+        plt.tight_layout()
         return fig, self.name
 
     @printer
@@ -808,7 +840,8 @@ class PostViewer:
             c.ax.tick_params(direction='in', right=1, left=1, size=1.5, labelsize=8)
 
         if self.bbox_to_anchor is None:
-            fig.legend(loc=self.loc)
+            # fig.legend(loc=self.loc)
+            pass
         else:
             fig.legend(loc=self.loc, bbox_to_anchor=self.bbox_to_anchor)
         plt.tight_layout()

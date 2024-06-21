@@ -29,6 +29,11 @@ class Scan:
             self.line = "-"
 
         try:
+            self.marker = kwargs.pop("marker")
+        except KeyError:
+            self.marker = 'o'
+
+        try:
             self.alpha = kwargs.pop("alpha")
         except KeyError:
             self.alpha = 0.3
@@ -98,7 +103,7 @@ def export_line_scan(reader: callable, path: str, *scans: List, **kwargs:  Dict[
         data.to_excel(path, index=False)
 
 
-def scan_stat_factory(name: str = "av", color: str = "k", linestyle: str = "-", *scan: List):
+def scan_stat_factory(name: str = "av", color: str = "k", linestyle: str = "-", alpha: float = 0.3, *scan: List):
     """
     Create a scan object representing the statistical summary of multiple scans.
 
@@ -126,7 +131,7 @@ def scan_stat_factory(name: str = "av", color: str = "k", linestyle: str = "-", 
     mean = values.mean(axis=0)
     quad = np.sqrt(squared_uncertainty.sum(axis=0))/len(scan)
 
-    av_scan = Scan(name=name, line=linestyle, color=color)
+    av_scan = Scan(name=name, line=linestyle, color=color, alpha=alpha)
     av_scan.load_data(x, mean, quad)
 
     return av_scan

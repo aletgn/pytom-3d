@@ -258,16 +258,12 @@ def recursive_search(path: str, extension: str = ".dat", match: str = None,
     ----------
     path : str
         The path to the directory to search in.
-
     extension : str, optional
         The file extension to search for. Default is ".dat".
-
     match : str, optional
         A substring to match in the file names. Default is None.
-
     pop_first : bool, optional
         If True, remove and discard the first element of the resulting list. Default is False.
-
     take_first : bool, optional
         If True, return only the first matching file. Overrides pop_first. Default is False.
 
@@ -454,7 +450,7 @@ def update(method: callable):
     return wrapper
 
 
-def contour_data_wrapper(path: str, match: str) -> Tuple[np.ndarray]:
+def contour_data_wrapper(path: str, match: str, pop_first=True, take_first=False) -> Tuple[np.ndarray]:
     """
     Wrapper function for generating contour data.
 
@@ -464,6 +460,10 @@ def contour_data_wrapper(path: str, match: str) -> Tuple[np.ndarray]:
         Path to the directory containing data files.
     match : str
         A string used to match the desired data files.
+    pop_first : bool, optional
+        If True, remove and discard the first element of the resulting list. Default is False.
+    take_first : bool, optional
+        If True, return only the first matching file. Overrides pop_first. Default is False.
 
     Returns
     -------
@@ -471,7 +471,7 @@ def contour_data_wrapper(path: str, match: str) -> Tuple[np.ndarray]:
         A tuple containing the x-coordinates, y-coordinates, mean value, and standard deviation.
 
     """
-    data = recursive_search(path, match=match, pop_first=True, take_first=False)
+    data = recursive_search(path, match=match, pop_first=pop_first, take_first=take_first)
 
     mean = running_mean(3, None, *data)
     std = running_std(3, None, 1, *data)
@@ -480,7 +480,7 @@ def contour_data_wrapper(path: str, match: str) -> Tuple[np.ndarray]:
     return x.reshape(-1), y.reshape(-1), mean, std
 
 
-def scan_data_wrapper(path: str, match: str) -> Tuple[np.ndarray]:
+def scan_data_wrapper(path: str, match: str, pop_first=True, take_first=False) -> Tuple[np.ndarray]:
     """
     Wrapper function for generating scan data.
 
@@ -490,6 +490,10 @@ def scan_data_wrapper(path: str, match: str) -> Tuple[np.ndarray]:
         Path to the directory containing data files.
     match : str
         A string used to match the desired data files.
+    pop_first : bool, optional
+        If True, remove and discard the first element of the resulting list. Default is False.
+    take_first : bool, optional
+        If True, return only the first matching file. Overrides pop_first. Default is False.
 
     Returns
     -------
@@ -497,7 +501,7 @@ def scan_data_wrapper(path: str, match: str) -> Tuple[np.ndarray]:
         A tuple containing the x-coordinates, mean value, and standard deviation.
 
     """
-    data = recursive_search(path, match=match, pop_first=True, take_first=False)
+    data = recursive_search(path, match=match, pop_first=pop_first, take_first=take_first)
 
     mean = running_mean(3, None, *data)
     std = running_std(3, None, 1, *data)
