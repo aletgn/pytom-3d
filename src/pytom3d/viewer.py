@@ -482,6 +482,7 @@ class PostViewer:
         self.mean_lim =  cbar_bounds(bot[2], top[2])
         self.std_lim = cbar_bounds(bot[3], top[3])
 
+    @printer
     def scan_view(self, swap: bool = False, *scan: List) -> None:
         """
         Plot scan data.
@@ -490,7 +491,7 @@ class PostViewer:
         ----------
         swap : bool, optional
             If True, swap x and y axes in the plot. Default is False.
-        *scan : List
+        scan : List
             List of scan data to plot. Each scan data should be provided as a list-like object.
 
         Returns
@@ -501,12 +502,22 @@ class PostViewer:
         fig, ax = plt.subplots(dpi=300)
         for s in scan:
             if swap:
-                ax.plot(s.y, s.x)
+                ax.plot(s.y, s.x, color=s.color, marker=s.marker,
+                        linewidth=1, linestyle=s.line, alpha=s.alpha, label=s.name)
 
             else:
-                ax.plot(s.x, s.y)
+                ax.plot(s.x, s.y, color=s.color, marker=s.marker,
+                        linewidth=1, linestyle=s.line, alpha=s.alpha, label=s.name)
 
-        plt.show()
+        ax.set_xlabel(self.xlabel)
+        ax.set_ylabel(self.ylabel)
+        ax.set_xlim(self.x_lim)
+        ax.set_ylim(self.y_lim)
+        ax.tick_params(direction="in", top=1, right=1, color="k")
+        plt.tight_layout()
+        ax.legend(loc='best')
+
+        return fig, self.name
 
     def scan_view_and_fill(self, swap: bool = False, *scan: List) -> None:
         """
