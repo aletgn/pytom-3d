@@ -550,7 +550,7 @@ class PostViewer:
         plt.show()
 
     @printer
-    def scan_view_and_bar(self, swap: bool = False, strip: Dict = None, *scan: List) -> None:
+    def scan_view_and_bar(self, swap: bool = False, strip: Dict = None, baloon: Dict = None, *scan: List) -> None:
         """
         Plot scan data with error bars.
 
@@ -562,6 +562,8 @@ class PostViewer:
             List of scan data to plot. Each scan data should be provided as a list-like object.
         strip : Dict
             Dictionary containing the information to draw a strip over the plot.
+        baloon : Dict
+            Optional ballon containing the label of data. The default is None.
 
         Example
         -------
@@ -601,6 +603,12 @@ class PostViewer:
             ax.text(strip["xs"][1]+strip["epsh"], self.y_lim[0]+strip["epsv"], strip["labelright"],
                     horizontalalignment='center', verticalalignment='center')
 
+        if baloon is not None:
+            bal = ax.text(self.x_lim[0]+baloon['eps'][0],
+                          self.y_lim[1]+baloon['eps'][1],
+                          baloon['text'])
+            bal.set_bbox(dict(facecolor='white', alpha=1, edgecolor='k'))
+
         try:
             ax.legend(**self.legend_config)
         except:
@@ -609,7 +617,7 @@ class PostViewer:
         return fig, self.name
 
     @printer
-    def scan_compare(self, fills: List, bars: List, regular: List = None, strip: Dict = None) -> Tuple:
+    def scan_compare(self, fills: List, bars: List, regular: List = None, strip: Dict = None, baloon: Dict = None) -> Tuple:
         """
         Compare scans by plotting filled regions and error bars.
 
@@ -621,6 +629,10 @@ class PostViewer:
             List of data for the error bars.
         regular : list of scans
             List of data for without fills and bars. The default is None
+        strip : Dict
+            Dictionary containing the information to draw a strip over the plot.
+        baloon : Dict
+            Optional ballon containing the label of data. The default is None.
 
         Returns
         -------
@@ -628,8 +640,6 @@ class PostViewer:
             The matplotlib figure object.
         name : str
             The name associated with the plot.
-        strip : Dict
-            Dictionary containing the information to draw a strip over the plot.
 
         Example
         -------
@@ -665,6 +675,12 @@ class PostViewer:
                     horizontalalignment='center', verticalalignment='center')
         ax.tick_params(direction="in", top=1, right=1, color="k")
         ax.legend(**self.legend_config)
+
+        if baloon is not None:
+            bal = ax.text(self.x_lim[0]+baloon['eps'][0],
+                          self.y_lim[1]+baloon['eps'][1],
+                          baloon['text'])
+            bal.set_bbox(dict(facecolor='white', alpha=1, edgecolor='k'))
 
         return fig, self.name
 

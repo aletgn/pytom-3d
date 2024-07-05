@@ -452,7 +452,7 @@ def update(method: callable):
 
 def contour_data_wrapper(path: str, match: str, pop_first=True, take_first=False) -> Tuple[np.ndarray]:
     """
-    Wrapper function for generating contour data.
+    Wrapper function for processing contour data.
 
     Parameters
     ----------
@@ -475,6 +475,37 @@ def contour_data_wrapper(path: str, match: str, pop_first=True, take_first=False
 
     mean = running_mean(3, None, *data)
     std = running_std(3, None, 1, *data)
+    x, y = get_coordinates([0], *data), get_coordinates([1], *data)
+
+    return x.reshape(-1), y.reshape(-1), mean, std
+
+
+def contour_data_wrapper_2(path: str, match: str, pop_first=True, take_first=False) -> Tuple[np.ndarray]:
+    """
+    Wrapper function for processing contour data.
+
+    Parameters
+    ----------
+    path : str
+        Path to the directory containing data files.
+    match : str
+        A string used to match the desired data files.
+    pop_first : bool, optional
+        If True, remove and discard the first element of the resulting list. Default is False.
+    take_first : bool, optional
+        If True, return only the first matching file. Overrides pop_first. Default is False.
+
+    Returns
+    -------
+    Tuple[np.ndarray]
+        A tuple containing the x-coordinates, y-coordinates, mean value, and standard deviation.
+
+    """
+    data = recursive_search(path, match=match, pop_first=pop_first, take_first=take_first)
+    loaded = np.array([np.load(d)[:, 3] for d in data])
+
+    mean = loaded.mean(axis=0)
+    std = loaded.std(axis=0, ddof=1)
     x, y = get_coordinates([0], *data), get_coordinates([1], *data)
 
     return x.reshape(-1), y.reshape(-1), mean, std

@@ -60,6 +60,7 @@ class Scan:
         self.x = data.iloc[:, 0].to_numpy()
         self.y = data.iloc[:, 1].to_numpy()
         self.y_err = data.iloc[:, 2].to_numpy()
+        self.get_edges()
 
     def load_data(self, x: np.ndarray, y: np.ndarray, y_err: np.ndarray = None) -> None:
         """
@@ -77,6 +78,13 @@ class Scan:
         self.x = x
         self.y = y
         self.y_err = y_err
+        self.get_edges()
+
+    def get_edges(self):
+        self.xmin = np.argmin(self.x)
+        self.ymin = self.y.min()
+        self.xmax = np.argmax(self.x)
+        self.ymax = self.y.max()
 
 
 def export_line_scan(reader: callable, path: str, *scans: List, **kwargs:  Dict['str', Any]) -> None:
