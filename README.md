@@ -1,6 +1,6 @@
 # PyToM-3D: Python Topography Manipulator in 3D
 
-PyToM-3D is a Python package to transform and fit 3-dimensional topographies. It provides methods to perform traditional geometric transformations and visualise the results as well. Please note that the package is still in its development stage.
+PyToM-3D is a Python package to transform and fit 3-dimensional topographies. It provides methods to perform traditional geometric transformations and visualise the results as well. Please note that the package is still under development.
 
 ## Features
 
