@@ -168,21 +168,21 @@ class Viewer:
         for d in data:
             # XY plane
             plt.subplot(221)
-            plt.scatter(d.P[:, 0], d.P[:, 1], s=1, alpha=1)
+            plt.scatter(d.P[:, 0], d.P[:, 1], s=1, alpha=0.3)
             plt.title('xy plane')
             plt.xlabel('x')
             plt.ylabel('y')
 
             # XZ plane
             plt.subplot(222)
-            plt.scatter(d.P[:, 0], d.P[:, 2], s=1, alpha=1)
+            plt.scatter(d.P[:, 0], d.P[:, 2], s=1, alpha=0.3)
             plt.title('xz plane')
             plt.xlabel('x')
             plt.ylabel('z')
 
             # YZ plane
             plt.subplot(223)
-            plt.scatter(d.P[:, 1], d.P[:, 2], s=1, alpha=1)
+            plt.scatter(d.P[:, 1], d.P[:, 2], s=1, alpha=0.3)
             plt.title('yz plane')
             plt.xlabel('y')
             plt.ylabel('z')

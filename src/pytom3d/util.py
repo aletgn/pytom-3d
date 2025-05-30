@@ -7,6 +7,7 @@ import pandas as pd
 import re
 from typing import Tuple, List, Any
 from matplotlib import pyplot as plt
+from scipy.stats import binned_statistic_2d
 
 from pytom3d.stats import running_mean, running_std
 
@@ -573,3 +574,53 @@ def printer(func: callable):
             print(f"SHOW: {title}")
             plt.show()
     return saver
+
+
+def binning_downsample(xbins: int, ybins: int, df: pd.DataFrame) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """
+    Downsamples a 2D dataset using mean aggregation in binned regions.
+
+    Parameters
+    ----------
+    xbins : int
+        Number of bins along the x-axis.
+    ybins : int
+        Number of bins along the y-axis.
+    df : pandas.DataFrame
+        A DataFrame with three columns: x, y, and z values. The first two columns
+        represent spatial coordinates and the third column is the value to average.
+
+    Returns
+    -------
+    x_valid : numpy.ndarray
+        Flattened array of x-coordinates corresponding to non-NaN binned values.
+    y_valid : numpy.ndarray
+        Flattened array of y-coordinates corresponding to non-NaN binned values.
+    z_valid : numpy.ndarray
+        Flattened array of mean z-values in each valid bin.
+    """
+    print("XBINS", xbins)
+    print("YBINS", ybins)
+    print("BINS", xbins * ybins)
+    stat, x_edges, y_edges, _ = binned_statistic_2d(df.iloc[:, 0].to_numpy(),
+                                                    df.iloc[:, 1].to_numpy(),
+                                                    df.iloc[:, 2].to_numpy(),
+                                                    statistic='mean',
+                                                    bins=[xbins, ybins])
+
+    x_centers = (x_edges[:-1] + x_edges[1:]) / 2
+    y_centers = (y_edges[:-1] + y_edges[1:]) / 2
+    X_centers, Y_centers = np.meshgrid(x_centers, y_centers)
+
+    stat_flat = stat.T.flatten()
+    x_centers_flat = X_centers.flatten()
+    y_centers_flat = Y_centers.flatten()
+
+    valid_mask = ~np.isnan(stat_flat)
+    z_valid = stat_flat[valid_mask]
+    x_valid = x_centers_flat[valid_mask]
+    y_valid = y_centers_flat[valid_mask]
+
+    print("VALID SAMPLES", z_valid.shape)
+
+    return x_valid, y_valid, z_valid
