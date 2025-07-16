@@ -617,7 +617,7 @@ class PostViewer:
         return fig, self.name
 
     @printer
-    def scan_compare(self, fills: List, bars: List, regular: List = None, strip: Dict = None, baloon: Dict = None) -> Tuple:
+    def scan_compare(self, fills: List, bars: List = None, regular: List = None, strip: Dict = None, baloon: Dict = None) -> Tuple:
         """
         Compare scans by plotting filled regions and error bars.
 
@@ -651,10 +651,13 @@ class PostViewer:
         for f in fills:
             ax.fill_between(f.x, f.y-f.y_err, f.y+f.y_err, color=f.color, alpha=f.alpha, edgecolor="none", zorder=1)
             ax.plot(f.x, f.y, color=f.color, label=f.name)
-        for b in bars:
-            ax.errorbar(b.x, b.y, xerr=None, yerr=b.y_err, fmt="o", c=b.color,
-                                    linestyle=b.line, markersize=3, capsize=3,
-                                    capthick=1, linewidth=0.8, label=b.name, zorder=2)
+
+        if bars is not None:
+            for b in bars:
+                ax.errorbar(b.x, b.y, xerr=None, yerr=b.y_err, fmt="o", c=b.color,
+                                        linestyle=b.line, markersize=3, capsize=3,
+                                        capthick=1, linewidth=0.8, label=b.name, zorder=2)
+
         if regular is not None:
             for r in regular:
                 ax.plot(r.x, r.y, color=r.color, marker=r.marker, markersize=3, label=r.name)
@@ -674,7 +677,11 @@ class PostViewer:
             ax.text(strip["xs"][1]+strip["epsh"], self.y_lim[0]+strip["epsv"], strip["labelright"],
                     horizontalalignment='center', verticalalignment='center')
         ax.tick_params(direction="in", top=1, right=1, color="k")
-        ax.legend(**self.legend_config)
+
+        try:
+            ax.legend(**self.legend_config)
+        except:
+            ax.legend()
 
         if baloon is not None:
             bal = ax.text(self.x_lim[0]+baloon['eps'][0],
