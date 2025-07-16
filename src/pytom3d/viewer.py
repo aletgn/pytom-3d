@@ -12,16 +12,16 @@ import numpy as np
 
 
 class Viewer:
-    
+
     def __init__(self, name: str = "unnamed") -> None:
         """
         Initialize a new instance of YourClass.
-    
+
         Parameters
         ----------
         name : str, optional
             The name to be assigned to the instance. Default is "unnamed".
-    
+
         Attributes
         ----------
         name : str
@@ -32,7 +32,7 @@ class Viewer:
             The limits for the y-axis.
         z_lim : List[float] or None
             The limits for the z-axis.
-            
+
         Returns
         -------
             None
@@ -131,7 +131,7 @@ class Viewer:
     def set_limits(self, x: List[float] = None, y: List[float] = None, z: List[float] = None) -> None:
         """
         Set the limits for the x, y, and z axes.
-    
+
         Parameters
         ----------
         x : List[float], optional
@@ -140,7 +140,7 @@ class Viewer:
             The limits for the y-axis.
         z : List[float], optional
             The limits for the z-axis.
-    
+
         Returns
         -------
         None
@@ -240,7 +240,7 @@ class Viewer:
         plt.gca().xaxis.set_major_formatter(ticker.StrMethodFormatter("{x:.0f}"))
         plt.gca().yaxis.set_major_formatter(ticker.StrMethodFormatter("{x:.0f}"))
         plt.gca().zaxis.set_major_formatter(ticker.StrMethodFormatter("{x:.2f}"))
-    
+
         ax.xaxis._axinfo['grid'].update(color = 'grey', linestyle = ':', linewidth = 0.5)
         ax.yaxis._axinfo['grid'].update(color = 'grey', linestyle = ':', linewidth = 0.5)
         ax.zaxis._axinfo['grid'].update(color = 'grey', linestyle = ':', linewidth = 0.5)
@@ -405,7 +405,7 @@ class PostViewer:
         self.fmt = fmt
         self.dpi = dpi
 
-    def config_scan_view(self, xlabel=r'$x$ [mm]', ylabel=r'$y$ [mm]', x_lim=[-20, 20], 
+    def config_scan_view(self, xlabel=r'$x$ [mm]', ylabel=r'$y$ [mm]', x_lim=[-20, 20],
                          y_lim=[-70, 70], legend_config = None):
 
         self.xlabel = xlabel
@@ -707,6 +707,43 @@ class PostViewer:
             a.set_ylabel(self.ylabel)
 
         cb1.ax.tick_params(direction='in', right=1, left=1, size=1.5, labelsize=8)
+
+        plt.tight_layout()
+        return fig, self.name
+
+    @printer
+    def contour_and_uncertainty(self, cnt,
+                                cbarmean: str = "Expected Value",
+                                cbarstd : str = "Uncertainty",
+                                ) -> Tuple:
+        fig = plt.figure(dpi=self.dpi, figsize=(4,4))
+        gs = GridSpec(2, 2, figure=fig,
+                        width_ratios=[0.975, 0.025],
+                        height_ratios=[0.5, 0.5])
+        ax1 = fig.add_subplot(gs[0, 0])
+        ax2 = fig.add_subplot(gs[1, 0])
+        ax3 = fig.add_subplot(gs[0, 1])
+        ax4 = fig.add_subplot(gs[1, 1])
+
+        im12, norm12 = discrete_colorbar(self.cmap, self.mean_lim[0], self.mean_lim[1], self.levels)
+        a1 = ax1.tricontourf(cnt.P[:,0], cnt.P[:,1], cnt.P[:,2], levels=self.levels, cmap=self.cmap)
+        cb1 = fig.colorbar(im12, ax=a1, cax=ax3, orientation='vertical', label=cbarmean, format="%.0f", pad=0.1, fraction=0.5,
+                           ticks=(np.linspace(self.mean_lim[0], self.mean_lim[1], self.levels)))
+
+        im34, norm34 = discrete_colorbar(self.cmap, self.std_lim[0], self.std_lim[1], self.levels)
+        a2 = ax2.tricontourf(cnt.P[:,0], cnt.P[:,1], cnt.unc, levels=self.levels, cmap=self.cmap)
+        cb2 = fig.colorbar(im34, ax=a2, cax=ax4, orientation='vertical', label=cbarstd, format="%.0f", pad=0.1, fraction=0.5,
+                           ticks=(np.linspace(self.std_lim[0], self.std_lim[1], self.levels))
+                           )
+
+        for a in [ax1, ax2]:
+            a.tick_params(direction="in", top=1, right=1, color="k") # pad=5
+            a.set_xlabel(self.xlabel)
+        #     a.set_xticks([-50, 0, 50])
+            a.set_ylabel(self.ylabel)
+
+        cb1.ax.tick_params(direction='in', right=1, left=1, size=1.5, labelsize=8)
+        cb2.ax.tick_params(direction='in', right=1, left=1, size=1.5, labelsize=8)
 
         plt.tight_layout()
         return fig, self.name
